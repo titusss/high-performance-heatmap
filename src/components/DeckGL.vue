@@ -67,7 +67,6 @@ export default {
     this.deck = null
   },
   mounted () {
-    // creating the deck.gl instance
     console.log(this.viewState)
     this.deck = new Deck({
       canvas: this.$refs.canvas,
