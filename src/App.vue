@@ -4,9 +4,21 @@
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link>
     </div>
+    <DeckGL/>
     <router-view/>
   </div>
 </template>
+
+<script>
+// @ is an alias to /src
+import DeckGL from '@/components/DeckGL.vue'
+
+export default {
+  components: {
+    DeckGL
+  }
+}
+</script>
 
 <style>
 #app {

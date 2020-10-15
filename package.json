@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "serve": "vue-cli-service serve --fix",
+    "build": "vue-cli-service build --fix",
+    "lint": "vue-cli-service lint --fix"
   },
   "dependencies": {
+    "axios": "^0.20.0",
     "core-js": "^3.6.5",
+    "deck.gl": "^8.3.0",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0"
   },
