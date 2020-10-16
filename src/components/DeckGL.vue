@@ -1,16 +1,6 @@
 <template>
   <div>
-    <div>
-      <label for="range-1">Example range with min and max</label>
-      <b-form-input
-        id="range-1"
-        v-model="settings.elevationScale"
-        type="range"
-        min="0"
-        max="500"
-      ></b-form-input>
-      <div class="mt-2">Value: {{ settings.elevationScale }}</div>
-    </div>
+    <settings/>
     <div class="deck-container" v-if="settings.elevationScale">
       <canvas id="deck-canvas" ref="canvas"></canvas>
     </div>
@@ -21,7 +11,11 @@
 import { Deck } from '@deck.gl/core'
 import { GridCellLayer } from '@deck.gl/layers'
 import axios from 'axios'
+import settings from '@/components/settings.vue'
 export default {
+  components: {
+    settings
+  },
   data () {
     return {
       url: 'http://[::]:8000/test-dict-index.json',
