@@ -1,6 +1,19 @@
 <template>
-  <div class="deck-container">
-    <canvas id="deck-canvas" ref="canvas"></canvas>
+  <div>
+    <div>
+      <label for="range-1">Example range with min and max</label>
+      <b-form-input
+        id="range-1"
+        v-model="settings.elevationScale"
+        type="range"
+        min="0"
+        max="500"
+      ></b-form-input>
+      <div class="mt-2">Value: {{ settings.elevationScale }}</div>
+    </div>
+    <div class="deck-container" v-if="settings.elevationScale">
+      <canvas id="deck-canvas" ref="canvas"></canvas>
+    </div>
   </div>
 </template>
 
@@ -15,6 +28,9 @@ export default {
       data: null,
       highestValue: null,
       lowestValue: null,
+      settings: {
+        elevationScale: 500
+      },
       viewState: {
         latitude: 0,
         longitude: 0.007,
@@ -67,30 +83,24 @@ export default {
     this.deck = null
   },
   mounted () {
-    console.log(this.viewState)
     this.deck = new Deck({
       canvas: this.$refs.canvas,
       initialViewState: this.viewState,
       controller: true
-      // change the map's viewstate whenever the view state of deck.gl changes
-      // onViewStateChange: ({ viewState }) => {
-      //   this.map.jumpTo({
-      //     center: [viewState.longitude, viewState.latitude],
-      //     zoom: viewState.zoom,
-      //     bearing: viewState.bearing,
-      //     pitch: viewState.pitch
-      //   })
-      // }
     })
+    // this.deck.layerManager.layers[0].props.elevationScale = 10
   },
   computed: {
+    getSettings () {
+      return this.settings.elevationScale
+    },
     getLayers () {
       const gridLayer = new GridCellLayer({
         id: 'grid-cell-layer',
         data: this.data,
         elevationScale: 400,
         extruded: true,
-        cellSize: 700,
+        cellSize: this.settings.elevationScale,
         getPosition: d => d.COORDINATES,
         getFillColor: d => [255, 255, 0, 255],
         getElevation: d => d.VALUE
@@ -168,8 +178,10 @@ export default {
   height: 80vh;
   position: relative;
 }
-#deck-canvas {
+#deckgl-overlay {
   width: 100%;
   height: 100%;
+  top: 0;
+  left: 0;
 }
 </style>

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.20.0",
+    "bootstrap-vue": "^2.17.3",
     "core-js": "^3.6.5",
     "deck.gl": "^8.3.0",
     "vue": "^2.6.11",
