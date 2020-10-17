@@ -3,7 +3,7 @@
     <div class="deck-container">
       <canvas id="deck-canvas" ref="canvas"></canvas>
     </div>
-    <settingsMenu v-if="ready" class="settings_menu" @settingsChanged="updateSettings"/>
+    <settingsMenu v-if="data" class="settings_menu" @settingsChanged="updateSettings"/>
   </div>
 </template>
 
@@ -18,7 +18,8 @@ export default {
   },
   data () {
     return {
-      url: 'http://[::]:8000/test-dict-index.json',
+      // url: 'http://[::]:8000/test-dict-index.json',
+      url: 'https://raw.githubusercontent.com/chinapwn/high-performance-heatmap/master/src/assets/test-dict-index.json',
       data: null,
       highestValue: null,
       lowestValue: null,
