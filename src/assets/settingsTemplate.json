@@ -2,177 +2,191 @@
   "basicSettings": {
     "label": "Settings",
     "id": "generalSettings",
+    "visible": true,
     "settings": [
-
-        {
-          "label": "Visual",
-          "inputs": [
-            {
-              "id": "cellSize",
-              "label": "Cell Size",
-              "type": "range",
-              "min": "0",
-              "max": "1000",
-              "step": "1",
-              "labelCols": 5,
-              "value": "200"
-            },
-            {
-              "id": "elevationScale",
-              "label": "Elevation",
-              "type": "range",
-              "min": "0",
-              "max": "500",
-              "step": "1",
-              "labelCols": 5,
-              "value": "200"
-            },
-            {
-              "id": "extruded",
-              "label": "Extruded",
-              "type": "checkbox",
-              "labelCols": 6,
-              "value": true
-            },
-            {
-              "id": "opacity",
-              "label": "Opacity",
-              "type": "range",
-              "min": "0",
-              "max": "500",
-              "step": "1",
-              "labelCols": 5,
-              "value": "200"
-            }
-          ]
-        },
-        {
-          "label": "Tooltip",
-          "inputs": [
-            {
-              "id": "enrichrAnalysis",
-              "label": "Enrichr Gene Analysis",
-              "type": "checkbox",
-              "labelCols": 6,
-              "value": false
-            },
-            {
-              "id": "tooltip",
-              "label": "Show Tooltip",
-              "type": "checkbox",
-              "labelCols": 6,
-              "value": true
-            }
-          ]
-        },
-        {
-          "label": "Color Gradient",
-          "inputs": [
-            {
-              "id": "gradientPresets",
-              "label": "Gradient Presets",
-              "type": "gradient",
-              "value": "RdYlGn",
-              "options": ["RdYlGn"]
-            }
-          ]
-        }
-
+      {
+        "label": "Visual",
+        "inputs": [
+          {
+            "id": "cellSize",
+            "label": "Cell Size",
+            "type": "range",
+            "min": 0,
+            "max": 2000,
+            "step": 1,
+            "labelCols": 5,
+            "value": 700,
+            "propertyType": "layer"
+          },
+          {
+            "id": "elevationScale",
+            "label": "Elevation",
+            "type": "range",
+            "min": 0,
+            "max": 5000,
+            "step": 5,
+            "labelCols": 5,
+            "value": 200,
+            "propertyType": "layer"
+          },
+          {
+            "id": "extruded",
+            "label": "Extruded",
+            "type": "checkbox",
+            "labelCols": 6,
+            "value": true,
+            "propertyType": "layer"
+          },
+          {
+            "id": "opacity",
+            "label": "Opacity",
+            "type": "range",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "labelCols": 5,
+            "value": 1,
+            "propertyType": "lighting"
+          }
+        ]
+      },
+      {
+        "label": "Tooltip",
+        "inputs": [
+          {
+            "id": "enrichrAnalysis",
+            "label": "Enrichr Gene Analysis",
+            "type": "checkbox",
+            "labelCols": 6,
+            "value": false
+          },
+          {
+            "id": "tooltip",
+            "label": "Show Tooltip",
+            "type": "checkbox",
+            "labelCols": 6,
+            "value": true
+          }
+        ]
+      },
+      {
+        "label": "Color Gradient",
+        "inputs": [
+          {
+            "id": "gradientPresets",
+            "label": "Gradient Presets",
+            "type": "gradient",
+            "value": "RdYlGn",
+            "options": ["RdYlGn"]
+          }
+        ]
+      }
     ]
   },
   "advancedSettings": {
     "label": "Advanced Settings",
     "id": "advancedSettings",
-    "settings": [{
-          "label": "Lighting",
-          "inputs": [
-            {
-              "id": "advancedLighting",
-              "label": "Advanced Lighting",
-              "type": "checkbox",
-              "labelCols": 6,
-              "value": false
-            },
-            {
-              "id": "ambientLight",
-              "label": "Ambient Light",
-              "type": "range",
-              "min": "0",
-              "max": "1",
-              "step": "0.1",
-              "labelCols": 5,
-              "value": "0.5"
-            },
-            {
-              "id": "pointLight1",
-              "label": "Point Light 1",
-              "type": "range",
-              "min": "0",
-              "max": "1",
-              "step": "0.1",
-              "labelCols": 5,
-              "value": "0.5"
-            },
-            {
-              "id": "pointLight1",
-              "label": "Point Light 2",
-              "type": "range",
-              "min": "0",
-              "max": "1",
-              "step": "0.1",
-              "labelCols": 5,
-              "value": "0.5"
-            }
-          ]
-        },
-        {
-          "label": "Material",
-          "inputs": [
-            {
-              "id": "material",
-              "label": "Shader Material",
-              "type": "checkbox",
-              "value": true
-            },
-            {
-              "id": "advancedMaterial",
-              "label": "Advanced Material",
-              "type": "checkbox",
-              "labelCols": 6,
-              "value": false
-            },
-            {
-              "id": "ambientMaterial",
-              "label": "Ambient",
-              "type": "range",
-              "min": "0",
-              "max": "1",
-              "step": "0.1",
-              "labelCols": 5,
-              "value": "0.5"
-            },
-            {
-              "id": "diffuseMaterial",
-              "label": "Diffusion",
-              "type": "range",
-              "min": "0",
-              "max": "1",
-              "step": "0.1",
-              "labelCols": 5,
-              "value": "0.5"
-            },
-            {
-              "id": "shininess",
-              "label": "Shininess",
-              "type": "range",
-              "min": "0",
-              "max": "1000",
-              "step": "1",
-              "labelCols": 5,
-              "value": "100"
-            }
-          ]
-        }    
+    "visible": false,
+    "settings": [
+      {
+        "label": "Lighting",
+        "inputs": [
+          {
+            "id": "advancedLighting",
+            "label": "Advanced Lighting",
+            "type": "checkbox",
+            "labelCols": 6,
+            "value": false
+          },
+          {
+            "id": "ambientLight",
+            "label": "Ambient Light",
+            "type": "range",
+            "min": 0,
+            "max": 3,
+            "step": 0.1,
+            "labelCols": 5,
+            "value": 1,
+            "valueDependencyId": "advancedLighting"
+          },
+          {
+            "id": "pointLight1",
+            "label": "Point Light 1",
+            "type": "range",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "labelCols": 5,
+            "value": 0.8,
+            "valueDependencyId": "advancedLighting"
+          },
+          {
+            "id": "pointLight1",
+            "label": "Point Light 2",
+            "type": "range",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "labelCols": 5,
+            "value": 0.8,
+            "valueDependencyId": "advancedLighting"
+          }
+        ]
+      },
+      {
+        "label": "Material",
+        "inputs": [
+          {
+            "id": "material",
+            "label": "Shader Material",
+            "type": "checkbox",
+            "value": true,
+            "selected": true,
+            "propertyType": "lighting"
+          },
+          {
+            "id": "advancedMaterial",
+            "label": "Advanced Material",
+            "type": "checkbox",
+            "labelCols": 6,
+            "value": false,
+            "valueDependencyId": "material"
+          },
+          {
+            "id": "ambientMaterial",
+            "label": "Ambient",
+            "type": "range",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "labelCols": 5,
+            "value": 0.5,
+            "valueDependencyId": "advancedMaterial"
+          },
+          {
+            "id": "diffuseMaterial",
+            "label": "Diffusion",
+            "type": "range",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "labelCols": 5,
+            "value": 0.5,
+            "valueDependencyId": "advancedMaterial"
+          },
+          {
+            "id": "shininess",
+            "label": "Shininess",
+            "type": "range",
+            "min": 0,
+            "max": 1000,
+            "step": 1,
+            "labelCols": 5,
+            "value": 100,
+            "valueDependencyId": "advancedMaterial"
+          }
+        ]
+      }
     ]
   }
 }

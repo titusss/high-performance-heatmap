@@ -1,9 +1,9 @@
 <template>
   <div>
-    <settings/>
-    <div class="deck-container" v-if="settings.elevationScale">
+    <div class="deck-container">
       <canvas id="deck-canvas" ref="canvas"></canvas>
     </div>
+    <settingsMenu v-if="ready" class="settings_menu" @settingsChanged="updateSettings"/>
   </div>
 </template>
 
@@ -11,10 +11,10 @@
 import { Deck } from '@deck.gl/core'
 import { GridCellLayer } from '@deck.gl/layers'
 import axios from 'axios'
-import settings from '@/components/settings.vue'
+import settingsMenu from '@/components/settingsMenu.vue'
 export default {
   components: {
-    settings
+    settingsMenu
   },
   data () {
     return {
@@ -22,9 +22,15 @@ export default {
       data: null,
       highestValue: null,
       lowestValue: null,
+      elevationScale: 20,
+      ready: null,
       settings: {
-        elevationScale: 500
+        id: 'grid-cell-layer',
+        getPosition: d => d.COORDINATES,
+        getFillColor: d => [255, 255, 0, 255],
+        getElevation: d => d.VALUE
       },
+      cellSize: 200,
       viewState: {
         latitude: 0,
         longitude: 0.007,
@@ -82,39 +88,18 @@ export default {
       initialViewState: this.viewState,
       controller: true
     })
+    this.ready = true
     // this.deck.layerManager.layers[0].props.elevationScale = 10
   },
-  computed: {
-    getSettings () {
-      return this.settings.elevationScale
-    },
-    getLayers () {
-      const gridLayer = new GridCellLayer({
-        id: 'grid-cell-layer',
-        data: this.data,
-        elevationScale: 400,
-        extruded: true,
-        cellSize: this.settings.elevationScale,
-        getPosition: d => d.COORDINATES,
-        getFillColor: d => [255, 255, 0, 255],
-        getElevation: d => d.VALUE
-      })
-      return [gridLayer]
-    }
-  },
-  watch: {
-    // whenever the layer data is changed and new layers are created,
-    // rerender the layers
-    getLayers (layers) {
-      this.renderLayers(layers)
-    }
-  },
   methods: {
-    renderLayers (layers) {
-      // setting the layers to deck.gl props
-      this.deck.setProps({
-        layers
-      })
+    updateSettings (updatedSettings) {
+      console.log(updatedSettings)
+      console.log(this.settings)
+      const settings = Object.assign(updatedSettings, this.settings)
+      settings.data = this.data
+      settings.elevationScale = Number(updatedSettings.elevationScale) // This property is converted to string by Vue.js
+      console.log(settings)
+      this.deck.setProps({ layers: [new GridCellLayer(settings)] })
     },
     fetchData: function (url) {
       axios.get(url).then(res => {
@@ -177,5 +162,11 @@ export default {
   height: 100%;
   top: 0;
   left: 0;
+}
+.settings_menu {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
 }
 </style>
