@@ -12,6 +12,7 @@ import { Deck } from '@deck.gl/core'
 import { GridCellLayer } from '@deck.gl/layers'
 import axios from 'axios'
 import settingsMenu from '@/components/settingsMenu.vue'
+import chroma from 'chroma-js'
 export default {
   components: {
     settingsMenu
@@ -25,11 +26,13 @@ export default {
       lowestValue: null,
       elevationScale: 20,
       ready: null,
-      settings: {
-        id: 'grid-cell-layer',
-        getPosition: d => d.COORDINATES,
-        getFillColor: d => [255, 255, 0, 255],
-        getElevation: d => d.VALUE
+      layerSettings: {
+        gridCellLayer: {
+          id: 'grid-cell-layer',
+          getPosition: d => d.COORDINATES,
+          getElevation: d => d.VALUE
+          // scale = chroma.scale(schemeNames.diverging[1]).domain([min, max]);
+        }
       },
       cellSize: 200,
       viewState: {
@@ -94,12 +97,12 @@ export default {
   },
   methods: {
     updateSettings (updatedSettings) {
-      console.log(updatedSettings)
-      console.log(this.settings)
-      const settings = Object.assign(updatedSettings, this.settings)
+      const settings = Object.assign(updatedSettings, this.layerSettings.gridCellLayer)
       settings.data = this.data
       settings.elevationScale = Number(updatedSettings.elevationScale) // This property is converted to string by Vue.js
-      console.log(settings)
+      const colorGradient = chroma.scale(updatedSettings.gradientPreset.value).domain([this.lowestValue, this.highestValue / 100])
+      settings.getFillColor = d => colorGradient(d.VALUE).rgb()
+      settings.updateTriggers = { getFillColor: [colorGradient] }
       this.deck.setProps({ layers: [new GridCellLayer(settings)] })
     },
     fetchData: function (url) {
@@ -113,8 +116,8 @@ export default {
       var data = []
       var rows = Object.keys(json)
       var columns = Object.keys(json[rows[0]])
-      var highestValue
-      var lowestValue
+      var highestValue = json[rows[0]][columns[0]]
+      var lowestValue = json[rows[0]][columns[0]]
       for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
         for (var columnIndex = 1; columnIndex < columns.length; columnIndex++) {
           if (
@@ -146,6 +149,8 @@ export default {
           }
         }
       }
+      console.log(highestValue)
+      console.log(data)
       return [data, highestValue, lowestValue]
     }
   }

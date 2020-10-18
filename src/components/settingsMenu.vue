@@ -13,7 +13,6 @@
         size="sm"
         ><b-icon
           icon="chevron-down"
-          scale="0.8"
           style="padding-bottom: 3px;"
         ></b-icon
         ><span>{{ settingsMode.label }}</span></b-button
@@ -44,7 +43,7 @@
           >
             <b-form-input
               v-if="input.type === 'range' || input.type === 'dropdown'"
-              v-model="input.value"
+              v-model="settings[input.id]"
               :type="input.type"
               :step="input.step"
               :min="input.min"
@@ -52,24 +51,41 @@
               :id="input.id"
               :disabled="
                 input.valueDependencyId
-                  ? !block.inputs.find(x => x.id === input.valueDependencyId)
-                      .value
+                  ? !settings[input.valueDependencyId]
                   : false
               "
             ></b-form-input>
             <b-form-checkbox
               v-else-if="input.type === 'checkbox'"
-              v-model="input.value"
-              @hover="console.log('yay')"
+              v-model="settings[input.id]"
               :type="input.type"
               :id="input.id"
               :disabled="
                 input.valueDependencyId
-                  ? !block.inputs.find(x => x.id === input.valueDependencyId)
-                      .value
+                  ? !settings[input.valueDependencyId]
                   : false
               "
             ></b-form-checkbox>
+            <b-dropdown
+              class="dropdown-gradient"
+              variant="link"
+              size="sm"
+              v-model="settings[input.id]"
+              v-else-if="input.type === 'dropdownGradient'"
+              :id="input.id"
+              :disabled="
+                input.valueDependencyId
+                  ? !settings[input.valueDependencyId]
+                  : false
+              "
+              ><template v-slot:button-content>
+                {{ settings[input.id].label }}
+              </template>
+              <b-dropdown-item-button v-for="gradient in input.options" :key="gradient.label" @click="settings[input.id] = gradient">{{gradient.label}}</b-dropdown-item-button>
+              <!-- <b-dropdown-form>
+                <b-form-group v-for="gradient in input.options" :label="gradient.label" label-for="dropdown-form-email" @submit.stop.prevent>
+              </b-dropdown-form> -->
+            </b-dropdown>
           </b-form-group>
         </b-form-group>
       </b-collapse>
@@ -87,10 +103,9 @@ export default {
     }
   },
   watch: {
-    settingsTemplate: {
+    settings: {
       handler: function () {
-        const settings = this.generateSettings()
-        this.$emit('settingsChanged', settings)
+        this.$emit('settingsChanged', this.settings)
       },
       deep: true
     }
@@ -168,5 +183,15 @@ label {
 }
 .rotate_down {
   transform: rotate(90);
+}
+.dropdown-gradient {
+  float: left;
+  margin-left: -5px;
+  border-bottom: 2px solid #d6d8db;
+}
+.dropdown-gradient>button {
+  text-decoration: none !important;
+  color: #2c3e50;
+  padding: 0px !important;
 }
 </style>

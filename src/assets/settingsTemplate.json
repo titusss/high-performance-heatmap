@@ -73,11 +73,24 @@
         "label": "Color Gradient",
         "inputs": [
           {
-            "id": "gradientPresets",
+            "id": "gradientPreset",
             "label": "Gradient Presets",
-            "type": "gradient",
-            "value": "RdYlGn",
-            "options": ["RdYlGn"]
+            "type": "dropdownGradient",
+            "labelCols": 6,
+            "value": {
+              "label": "RdYlGn",
+              "value": "RdYlGn"
+            },
+            "options": [
+              {
+                "label": "RdYlGn",
+                "value": "RdYlGn"
+              },
+              {
+                "label": "Spectral",
+                "value": "Spectral"
+              }
+            ]
           }
         ]
       }
