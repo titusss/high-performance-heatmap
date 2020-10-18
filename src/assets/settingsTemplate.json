@@ -89,6 +89,26 @@
               {
                 "label": "Spectral",
                 "value": "Spectral"
+              },
+              {
+                "label": "BuGn",
+                "value": "BuGn"
+              },
+              {
+                "label": "BuPu",
+                "value": "BuPu"
+              },
+              {
+                "label": "GnBu",
+                "value": "GnBu"
+              },
+              {
+                "label": "OrRd",
+                "value": "OrRd"
+              },
+              {
+                "label": "PuBu",
+                "value": "PuBu"
               }
             ]
           }

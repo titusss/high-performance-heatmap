@@ -26,11 +26,15 @@ export default {
       lowestValue: null,
       elevationScale: 20,
       ready: null,
+      colorGradient: null,
+      colorGradientPreset: null,
       layerSettings: {
         gridCellLayer: {
           id: 'grid-cell-layer',
           getPosition: d => d.COORDINATES,
-          getElevation: d => d.VALUE
+          getElevation: d => d.VALUE,
+          getFillColor: d => this.colorGradient(d.VALUE).rgb(),
+          updateTriggers: { getFillColor: this.colorGradientPreset }
           // scale = chroma.scale(schemeNames.diverging[1]).domain([min, max]);
         }
       },
@@ -99,10 +103,12 @@ export default {
     updateSettings (updatedSettings) {
       const settings = Object.assign(updatedSettings, this.layerSettings.gridCellLayer)
       settings.data = this.data
+      if (this.colorGradientPreset !== updatedSettings.gradientPreset.value) {
+        this.colorGradientPreset = updatedSettings.gradientPreset.value
+        this.colorGradient = chroma.scale(this.colorGradientPreset).domain([this.lowestValue / 100, this.highestValue / 100])
+        settings.updateTriggers = { getFillColor: this.colorGradientPreset }
+      }
       settings.elevationScale = Number(updatedSettings.elevationScale) // This property is converted to string by Vue.js
-      const colorGradient = chroma.scale(updatedSettings.gradientPreset.value).domain([this.lowestValue, this.highestValue / 100])
-      settings.getFillColor = d => colorGradient(d.VALUE).rgb()
-      settings.updateTriggers = { getFillColor: [colorGradient] }
       this.deck.setProps({ layers: [new GridCellLayer(settings)] })
     },
     fetchData: function (url) {
