@@ -46,7 +46,7 @@
             "step": 0.01,
             "labelCols": 5,
             "value": 1,
-            "propertyType": "lighting"
+            "propertyType": "layer"
           }
         ]
       },
@@ -58,14 +58,16 @@
             "label": "Enrichr Gene Analysis",
             "type": "checkbox",
             "labelCols": 6,
-            "value": false
+            "value": false,
+            "propertyType": "custom"
           },
           {
             "id": "tooltip",
             "label": "Show Tooltip",
             "type": "checkbox",
             "labelCols": 6,
-            "value": true
+            "value": true,
+            "propertyType": "custom"
           }
         ]
       },
@@ -77,6 +79,7 @@
             "label": "Gradient Presets",
             "type": "dropdownGradient",
             "labelCols": 6,
+            "propertyType": "layer",
             "value": {
               "label": "RdYlGn",
               "value": "RdYlGn"
@@ -129,7 +132,8 @@
             "label": "Advanced Lighting",
             "type": "checkbox",
             "labelCols": 6,
-            "value": false
+            "value": false,
+            "propertyType": "lighting"
           },
           {
             "id": "ambientLight",
@@ -140,7 +144,8 @@
             "step": 0.1,
             "labelCols": 5,
             "value": 1,
-            "valueDependencyId": "advancedLighting"
+            "valueDependencyId": "advancedLighting",
+            "propertyType": "lighting"
           },
           {
             "id": "pointLight1",
@@ -151,10 +156,11 @@
             "step": 0.1,
             "labelCols": 5,
             "value": 0.8,
-            "valueDependencyId": "advancedLighting"
+            "valueDependencyId": "advancedLighting",
+            "propertyType": "lighting"
           },
           {
-            "id": "pointLight1",
+            "id": "pointLight2",
             "label": "Point Light 2",
             "type": "range",
             "min": 0,
@@ -162,7 +168,8 @@
             "step": 0.1,
             "labelCols": 5,
             "value": 0.8,
-            "valueDependencyId": "advancedLighting"
+            "valueDependencyId": "advancedLighting",
+            "propertyType": "lighting"
           }
         ]
       },
@@ -175,7 +182,7 @@
             "type": "checkbox",
             "value": true,
             "selected": true,
-            "propertyType": "lighting"
+            "propertyType": "layer"
           },
           {
             "id": "advancedMaterial",
@@ -183,7 +190,8 @@
             "type": "checkbox",
             "labelCols": 6,
             "value": false,
-            "valueDependencyId": "material"
+            "valueDependencyId": "material",
+            "propertyType": "material"
           },
           {
             "id": "ambientMaterial",
@@ -194,7 +202,8 @@
             "step": 0.1,
             "labelCols": 5,
             "value": 0.5,
-            "valueDependencyId": "advancedMaterial"
+            "valueDependencyId": "advancedMaterial",
+            "propertyType": "lighting"
           },
           {
             "id": "diffuseMaterial",
@@ -205,7 +214,8 @@
             "step": 0.1,
             "labelCols": 5,
             "value": 0.5,
-            "valueDependencyId": "advancedMaterial"
+            "valueDependencyId": "advancedMaterial",
+            "propertyType": "lighting"
           },
           {
             "id": "shininess",
@@ -216,7 +226,8 @@
             "step": 1,
             "labelCols": 5,
             "value": 100,
-            "valueDependencyId": "advancedMaterial"
+            "valueDependencyId": "advancedMaterial",
+            "propertyType": "lighting"
           }
         ]
       }

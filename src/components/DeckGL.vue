@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { Deck } from '@deck.gl/core'
+import { Deck, LightingEffect, AmbientLight, PointLight } from '@deck.gl/core'
 import { GridCellLayer } from '@deck.gl/layers'
 import axios from 'axios'
 import settingsMenu from '@/components/settingsMenu.vue'
@@ -20,14 +20,30 @@ export default {
   data () {
     return {
       // url: 'http://[::]:8000/test-dict-index.json',
-      url: 'https://raw.githubusercontent.com/chinapwn/high-performance-heatmap/master/src/assets/test-dict-index.json',
+      url:
+        'https://raw.githubusercontent.com/chinapwn/high-performance-heatmap/master/src/assets/test-dict-index.json',
       data: null,
       highestValue: null,
       lowestValue: null,
-      elevationScale: 20,
-      ready: null,
       colorGradient: null,
       colorGradientPreset: null,
+      advancedLighting: false,
+      lights: {
+        ambientLight: {
+          color: [255, 255, 255],
+          intensity: 1
+        },
+        pointLight1: {
+          color: [255, 255, 255],
+          intensity: 0.8,
+          position: [-0.144528, 49.739968, 80000]
+        },
+        pointLight2: {
+          color: [255, 255, 255],
+          intensity: 0.8,
+          position: [-3.807751, 54.104682, 8000]
+        }
+      },
       layerSettings: {
         gridCellLayer: {
           id: 'grid-cell-layer',
@@ -35,10 +51,8 @@ export default {
           getElevation: d => d.VALUE,
           getFillColor: d => this.colorGradient(d.VALUE).rgb(),
           updateTriggers: { getFillColor: this.colorGradientPreset }
-          // scale = chroma.scale(schemeNames.diverging[1]).domain([min, max]);
         }
       },
-      cellSize: 200,
       viewState: {
         latitude: 0,
         longitude: 0.007,
@@ -96,20 +110,47 @@ export default {
       initialViewState: this.viewState,
       controller: true
     })
-    this.ready = true
     // this.deck.layerManager.layers[0].props.elevationScale = 10
   },
   methods: {
     updateSettings (updatedSettings) {
-      const settings = Object.assign(updatedSettings, this.layerSettings.gridCellLayer)
-      settings.data = this.data
-      if (this.colorGradientPreset !== updatedSettings.gradientPreset.value) {
-        this.colorGradientPreset = updatedSettings.gradientPreset.value
-        this.colorGradient = chroma.scale(this.colorGradientPreset).domain([this.lowestValue / 100, this.highestValue / 100])
-        settings.updateTriggers = { getFillColor: this.colorGradientPreset }
+      const s = updatedSettings.settings
+      if (updatedSettings.type === 'layer') {
+        // This isn't optimal as selected properties are defined in this update function.
+        const settings = Object.assign(s, this.layerSettings.gridCellLayer)
+        settings.data = this.data
+        if (this.colorGradientPreset !== s.gradientPreset.value) {
+          this.colorGradientPreset = s.gradientPreset.value
+          this.colorGradient = chroma
+            .scale(this.colorGradientPreset)
+            .domain([this.lowestValue / 100, this.highestValue / 100])
+          settings.updateTriggers = { getFillColor: this.colorGradientPreset }
+        }
+        settings.elevationScale = Number(s.elevationScale) // This property is converted to string by Vue.js
+        this.deck.setProps({ layers: [new GridCellLayer(settings)] })
+      } else if (updatedSettings.type === 'lighting') {
+        if (s.advancedLighting === true) {
+          const ambient = new AmbientLight({
+            color: [255, 255, 255],
+            intensity: s.ambientLight
+          })
+          const pointLight1 = new PointLight({
+            color: [255, 255, 255],
+            position: [0, 0, 30],
+            intensity: s.pointLight1
+          })
+          const pointLight2 = new PointLight({
+            color: [255, 255, 255],
+            position: [1, 2, 500],
+            intensity: s.pointLight2
+          })
+          this.deck.setProps({
+            effects: [new LightingEffect({ ambient, pointLight1, pointLight2 })]
+          })
+        } else {
+          this.deck.setProps({ effects: [] })
+        }
       }
-      settings.elevationScale = Number(updatedSettings.elevationScale) // This property is converted to string by Vue.js
-      this.deck.setProps({ layers: [new GridCellLayer(settings)] })
     },
     fetchData: function (url) {
       axios.get(url).then(res => {
@@ -155,8 +196,6 @@ export default {
           }
         }
       }
-      console.log(highestValue)
-      console.log(data)
       return [data, highestValue, lowestValue]
     }
   }

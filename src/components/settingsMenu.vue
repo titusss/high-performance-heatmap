@@ -43,7 +43,7 @@
           >
             <b-form-input
               v-if="input.type === 'range' || input.type === 'dropdown'"
-              v-model="settings[input.id]"
+              v-model="settings[input.propertyType][input.id]"
               :type="input.type"
               :step="input.step"
               :min="input.min"
@@ -51,18 +51,18 @@
               :id="input.id"
               :disabled="
                 input.valueDependencyId
-                  ? !settings[input.valueDependencyId]
+                  ? !settings[input.propertyType][input.valueDependencyId]
                   : false
               "
             ></b-form-input>
             <b-form-checkbox
               v-else-if="input.type === 'checkbox'"
-              v-model="settings[input.id]"
+              v-model="settings[input.propertyType][input.id]"
               :type="input.type"
               :id="input.id"
               :disabled="
                 input.valueDependencyId
-                  ? !settings[input.valueDependencyId]
+                  ? !settings[input.propertyType][input.valueDependencyId]
                   : false
               "
             ></b-form-checkbox>
@@ -70,21 +70,18 @@
               class="dropdown-gradient"
               variant="link"
               size="sm"
-              v-model="settings[input.id]"
+              v-model="settings[input.propertyType][input.id]"
               v-else-if="input.type === 'dropdownGradient'"
               :id="input.id"
               :disabled="
                 input.valueDependencyId
-                  ? !settings[input.valueDependencyId]
+                  ? !settings[input.propertyType][input.valueDependencyId]
                   : false
               "
               ><template v-slot:button-content>
-                {{ settings[input.id].label }}
+                {{ settings[input.propertyType][input.id].label }}
               </template>
-              <b-dropdown-item-button v-for="gradient in input.options" :key="gradient.label" @click="settings[input.id] = gradient">{{gradient.label}}</b-dropdown-item-button>
-              <!-- <b-dropdown-form>
-                <b-form-group v-for="gradient in input.options" :label="gradient.label" label-for="dropdown-form-email" @submit.stop.prevent>
-              </b-dropdown-form> -->
+              <b-dropdown-item-button v-for="gradient in input.options" :key="gradient.label" @click="settings[input.propertyType][input.id] = gradient">{{gradient.label}}</b-dropdown-item-button>
             </b-dropdown>
           </b-form-group>
         </b-form-group>
@@ -103,16 +100,33 @@ export default {
     }
   },
   watch: {
-    settings: {
+    'settings.layer': {
       handler: function () {
-        this.$emit('settingsChanged', this.settings)
+        this.$emit('settingsChanged', { type: 'layer', settings: this.settings.layer })
+      },
+      deep: true
+    },
+    'settings.material': {
+      handler: function () {
+        this.$emit('settingsChanged', { type: 'material', settings: this.settings.material })
+      },
+      deep: true
+    },
+    'settings.lighting': {
+      handler: function () {
+        this.$emit('settingsChanged', { type: 'lighting', settings: this.settings.lighting })
       },
       deep: true
     }
   },
   methods: {
     generateSettings () {
-      var settings = {}
+      var settings = {
+        layer: {},
+        material: {},
+        lighting: {},
+        custom: {}
+      }
       for (var mode in settingsTemplate) {
         for (var i = 0; i < settingsTemplate[mode].settings.length; i++) {
           for (
@@ -121,7 +135,7 @@ export default {
             j++
           ) {
             var input = settingsTemplate[mode].settings[i].inputs[j]
-            settings[input.id] = input.value
+            settings[input.propertyType][input.id] = input.value
           }
         }
       }
@@ -130,9 +144,10 @@ export default {
   },
   created () {
     this.settings = this.generateSettings()
+    console.log(this.settings)
   },
   mounted () {
-    this.$emit('settingsChanged', this.settings)
+    this.$emit('settingsChanged', { type: 'layer', settings: this.settings.layer })
     console.log('yay', this.settings)
   }
 }
