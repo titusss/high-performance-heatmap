@@ -3,12 +3,21 @@
     <div class="deck-container">
       <canvas id="deck-canvas" ref="canvas"></canvas>
     </div>
-    <settingsMenu v-if="data" class="settings_menu" @settingsChanged="updateSettings"/>
+    <settingsMenu
+      v-if="data"
+      class="settings_menu"
+      @settingsChanged="updateSettings"
+    />
   </div>
 </template>
 
 <script>
-import { Deck, LightingEffect, AmbientLight, PointLight } from '@deck.gl/core'
+import {
+  Deck,
+  LightingEffect,
+  AmbientLight,
+  DirectionalLight
+} from '@deck.gl/core'
 import { GridCellLayer } from '@deck.gl/layers'
 import axios from 'axios'
 import settingsMenu from '@/components/settingsMenu.vue'
@@ -19,8 +28,7 @@ export default {
   },
   data () {
     return {
-      url: 'http://[::]:8000/test-dict-index-half.json',
-      // url: 'https://raw.githubusercontent.com/chinapwn/high-performance-heatmap/master/src/assets/test-dict-index.json',
+      backendUrl: 'https://hp-heatmap-backend-44nub6ij6q-ez.a.run.app',
       data: null,
       highestValue: null,
       lowestValue: null,
@@ -84,7 +92,7 @@ export default {
     }
   },
   created () {
-    this.fetchData(this.url)
+    this.fetchData(`${this.backendUrl}/config`)
     this.deck = null
   },
   mounted () {
@@ -113,23 +121,30 @@ export default {
         settings.elevationScale = Number(s.elevationScale) // This is necessary because Vue.js converts the property to a string.
         this.deck.setProps({ layers: [new GridCellLayer(settings)] })
       } else if (updatedSettings.type === 'lighting') {
-        if (s.advancedLighting === true) { // Only build new lights when advanced light is activated. Probably not necessary but I speculate on performance advantages with this approach.
+        if (s.advancedLighting === true) {
+          // Only build new lights when advanced light is activated. Probably not necessary but I speculate on performance advantages with this approach.
           const ambient = new AmbientLight({
             color: [255, 255, 255],
             intensity: s.ambientLight
           })
-          const pointLight1 = new PointLight({
+          const directionalLight1 = new DirectionalLight({
             color: [255, 255, 255],
-            position: [0, 0, 30000],
-            intensity: s.pointLight1
+            direction: [this.highestValue / 2, 5, 3000],
+            intensity: s.directionalLight1
           })
-          const pointLight2 = new PointLight({
+          const directionalLight2 = new DirectionalLight({
             color: [255, 255, 255],
-            position: [1, 0.1, 1000],
-            intensity: s.pointLight2
+            position: [this.highestValue / 4, 0.1, 1000],
+            intensity: s.directionalLight2
           })
           this.deck.setProps({
-            effects: [new LightingEffect({ ambient, pointLight1, pointLight2 })]
+            effects: [
+              new LightingEffect({
+                ambient,
+                directionalLight1,
+                directionalLight2
+              })
+            ]
           })
         } else {
           this.deck.setProps({ effects: [] })
@@ -137,11 +152,11 @@ export default {
       }
     },
     fetchData: function (url) {
+      var payload = new FormData()
+      payload.append('url', JSON.stringify(this.$route.query.config))
       axios.get(url).then(res => {
-        [this.data, this.highestValue, this.lowestValue] = this.processJsonData(
-          res.data
-        )
-      })
+        [this.data, this.highestValue, this.lowestValue] = this.processJsonData(res.data)
+      }).catch(error => { console.log(error) })
     },
     processJsonData: function (json) {
       var data = []
@@ -176,10 +191,18 @@ export default {
               Math.log(2)
             // cell.VALUE = json[rows[rowIndex]][columns[columnIndex]];
             data.push(cell)
-            if (cell.VALUE > highestValue) {
+            if (
+              cell.VALUE > highestValue &&
+              cell.VALUE !== Infinity &&
+              cell.VALUE !== -Infinity
+            ) {
               highestValue = cell.VALUE
             }
-            if (cell.VALUE < lowestValue && cell.VALUE !== -Infinity && cell.VALUE !== Infinity) {
+            if (
+              cell.VALUE < lowestValue &&
+              cell.VALUE !== -Infinity &&
+              cell.VALUE !== Infinity
+            ) {
               lowestValue = cell.VALUE
             }
           }
