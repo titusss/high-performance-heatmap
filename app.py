@@ -12,6 +12,7 @@ visualizations = db.visualizations
 
 DEBUG = True
 app = Flask(__name__)
+CORS(app)
 CORS(app, resources={r'/*': {'origins': '*'}})  # enable CORS
 
 @app.route('/config', methods=['GET', 'POST'])
