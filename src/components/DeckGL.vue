@@ -154,7 +154,7 @@ export default {
     fetchData: function (url) {
       var payload = new FormData()
       payload.append('url', JSON.stringify(this.$route.query.config))
-      axios.get(url).then(res => {
+      axios.post(url, payload).then(res => {
         [this.data, this.highestValue, this.lowestValue] = this.processJsonData(res.data)
       }).catch(error => { console.log(error) })
     },
