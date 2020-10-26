@@ -62,12 +62,12 @@
             "propertyType": "custom"
           },
           {
-            "id": "tooltip",
+            "id": "pickable",
             "label": "Show Tooltip",
             "type": "checkbox",
             "labelCols": 6,
             "value": true,
-            "propertyType": "custom"
+            "propertyType": "layer"
           }
         ]
       },

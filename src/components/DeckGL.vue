@@ -19,31 +19,14 @@ export default {
   },
   data () {
     return {
-      // url: 'http://[::]:8000/test-dict-index.json',
-      url:
-        'https://raw.githubusercontent.com/chinapwn/high-performance-heatmap/master/src/assets/test-dict-index.json',
+      url: 'http://[::]:8000/test-dict-index-half.json',
+      // url: 'https://raw.githubusercontent.com/chinapwn/high-performance-heatmap/master/src/assets/test-dict-index.json',
       data: null,
       highestValue: null,
       lowestValue: null,
       colorGradient: null,
       colorGradientPreset: null,
       advancedLighting: false,
-      lights: {
-        ambientLight: {
-          color: [255, 255, 255],
-          intensity: 1
-        },
-        pointLight1: {
-          color: [255, 255, 255],
-          intensity: 0.8,
-          position: [-0.144528, 49.739968, 80000]
-        },
-        pointLight2: {
-          color: [255, 255, 255],
-          intensity: 0.8,
-          position: [-3.807751, 54.104682, 8000]
-        }
-      },
       layerSettings: {
         gridCellLayer: {
           id: 'grid-cell-layer',
@@ -108,15 +91,16 @@ export default {
     this.deck = new Deck({
       canvas: this.$refs.canvas,
       initialViewState: this.viewState,
-      controller: true
+      controller: true,
+      getTooltip: this.getTooltip
     })
     // this.deck.layerManager.layers[0].props.elevationScale = 10
   },
   methods: {
     updateSettings (updatedSettings) {
       const s = updatedSettings.settings
+      // It might be useful to use a switch case instead, if the possible conditions grow beyond 5 items.
       if (updatedSettings.type === 'layer') {
-        // This isn't optimal as selected properties are defined in this update function.
         const settings = Object.assign(s, this.layerSettings.gridCellLayer)
         settings.data = this.data
         if (this.colorGradientPreset !== s.gradientPreset.value) {
@@ -126,22 +110,22 @@ export default {
             .domain([this.lowestValue / 100, this.highestValue / 100])
           settings.updateTriggers = { getFillColor: this.colorGradientPreset }
         }
-        settings.elevationScale = Number(s.elevationScale) // This property is converted to string by Vue.js
+        settings.elevationScale = Number(s.elevationScale) // This is necessary because Vue.js converts the property to a string.
         this.deck.setProps({ layers: [new GridCellLayer(settings)] })
       } else if (updatedSettings.type === 'lighting') {
-        if (s.advancedLighting === true) {
+        if (s.advancedLighting === true) { // Only build new lights when advanced light is activated. Probably not necessary but I speculate on performance advantages with this approach.
           const ambient = new AmbientLight({
             color: [255, 255, 255],
             intensity: s.ambientLight
           })
           const pointLight1 = new PointLight({
             color: [255, 255, 255],
-            position: [0, 0, 30],
+            position: [0, 0, 30000],
             intensity: s.pointLight1
           })
           const pointLight2 = new PointLight({
             color: [255, 255, 255],
-            position: [1, 2, 500],
+            position: [1, 0.1, 1000],
             intensity: s.pointLight2
           })
           this.deck.setProps({
@@ -163,21 +147,30 @@ export default {
       var data = []
       var rows = Object.keys(json)
       var columns = Object.keys(json[rows[0]])
-      var highestValue = json[rows[0]][columns[0]]
-      var lowestValue = json[rows[0]][columns[0]]
+      var lowestValue = json[rows[0]][columns[4]]
+      var highestValue = json[rows[0]][columns[4]]
       for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+        var columnCoordinate = 1
         for (var columnIndex = 1; columnIndex < columns.length; columnIndex++) {
           if (
             columns[columnIndex] !== 'start' &&
             columns[columnIndex] !== 'end' &&
-            columns[columnIndex] !== 'strand'
+            columns[columnIndex] !== 'strand' &&
+            columns[columnIndex] !== 'common gene name'
           ) {
             var cell = {
               COORDINATES: [],
               VALUE: 0
             }
+            if (columns[columnIndex].startsWith('(')) {
+              columnCoordinate += 2
+            } else {
+              columnCoordinate++
+            }
             cell.COORDINATES.push(rowIndex / 140)
-            cell.COORDINATES.push(columnIndex / 140)
+            cell.COORDINATES.push(columnCoordinate / 140)
+            cell.COLUMN = columns[columnIndex]
+            cell.ROW = rows[rowIndex]
             cell.VALUE =
               Math.log(json[rows[rowIndex]][columns[columnIndex]]) /
               Math.log(2)
@@ -186,17 +179,38 @@ export default {
             if (cell.VALUE > highestValue) {
               highestValue = cell.VALUE
             }
-            if (cell.VALUE < lowestValue) {
-              if (cell.VALUE < 0) {
-                lowestValue = 1
-              } else {
-                lowestValue = cell.VALUE
-              }
+            if (cell.VALUE < lowestValue && cell.VALUE !== -Infinity && cell.VALUE !== Infinity) {
+              lowestValue = cell.VALUE
             }
           }
         }
       }
       return [data, highestValue, lowestValue]
+    },
+    getTooltip: function ({ object }) {
+      if (!object) {
+        return null
+      }
+      const column = object.COLUMN
+      const row = object.ROW
+      const count = object.VALUE
+      return {
+        html: `\
+        ${column}<br>
+        ${row}<br>
+        <strong>${count}</strong>`
+        // style: {
+        //   backgroundColor: '#000',
+        //   margin: '0'
+        // }
+      }
+      // Below is an example for a more advanced tooltip format according to: https://github.com/visgl/deck.gl/blob/8.3-release/examples/website/3d-heatmap/app.js
+      // const lat = object.COORDINATES[1]
+      // const lng = object.COORDINATES[0]
+      // return `\
+      //   latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}
+      //   longitude: ${Number.isFinite(lng) ? lng.toFixed(6) : ''}
+      //   ${count} Accidents`
     }
   }
 }
@@ -205,7 +219,7 @@ export default {
 <style>
 .deck-container {
   width: 100vw;
-  height: 80vh;
+  height: 100vh;
   position: relative;
 }
 #deckgl-overlay {
