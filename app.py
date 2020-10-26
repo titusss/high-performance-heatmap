@@ -16,6 +16,7 @@ CORS(app)
 CORS(app, resources={r'/*': {'origins': '*'}})  # enable CORS
 
 @app.route('/config', methods=['GET', 'POST'])
+@cross_origin()
 def respond_config():
   if request.form['url'] != 'undefined':
     db_entry_id = ObjectId(loads(request.form['url']))
