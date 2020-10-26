@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ###########
 # Frontend
 ###########
@@ -29,6 +30,8 @@ pnpm-debug.log*
 # Backend
 ###########
 
+=======
+>>>>>>> 98f1922... Initial commit
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -166,4 +169,9 @@ dmypy.json
 .pytype/
 
 # Cython debug symbols
+<<<<<<< HEAD
 cython_debug/
+=======
+cython_debug/
+
+>>>>>>> 98f1922... Initial commit
