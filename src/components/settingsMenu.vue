@@ -144,11 +144,9 @@ export default {
   },
   created () {
     this.settings = this.generateSettings()
-    console.log(this.settings)
   },
   mounted () {
     this.$emit('settingsChanged', { type: 'layer', settings: this.settings.layer })
-    console.log('yay', this.settings)
   }
 }
 </script>

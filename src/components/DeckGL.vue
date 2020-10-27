@@ -165,7 +165,6 @@ export default {
             this.highestValue,
             this.lowestValue
           ] = this.processJsonData(res.data)
-          console.log(res)
         })
         .catch(error => {
           console.log(error)
@@ -225,7 +224,6 @@ export default {
           }
         }
       }
-      console.log(lowestValue, highestValue)
       return [data, highestValue, lowestValue]
     },
     getTooltip: function ({ object }) {
