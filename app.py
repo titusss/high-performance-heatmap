@@ -25,10 +25,12 @@ def respond_config():
     db_entry_id = ObjectId(loads(request.form['url']))
     db_entry = db.visualizations.find_one({"_id": db_entry_id})
     try:
-      data = pd.read_parquet(BytesIO(db_entry['filtered_dataframe']), index_col=0).to_json(orient='records')
+      data = pd.read_parquet(BytesIO(db_entry['filtered_dataframe']))
+      data = data.set_index(list(df)[0], inplace=True).to_json(orient='index')
     except:
       if type(db_entry['transformed_dataframe']) == bytes: # The mockup db_entry stores the empty transformed_dataframe as a list, so don't convert that one.
-        data = pd.read_parquet(BytesIO(db_entry['transformed_dataframe'])).to_json(orient='records')
+        data = pd.read_parquet(BytesIO(db_entry['transformed_dataframe']))
+        data = data.set_index(list(df)[0], inplace=True).to_json(orient='index')
       else:
         data = db_entry['transformed_dataframe']
   return Response(data, mimetype="application/json")
