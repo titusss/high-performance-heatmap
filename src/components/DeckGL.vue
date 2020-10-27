@@ -28,6 +28,7 @@ export default {
   },
   data () {
     return {
+      // backendUrl: 'http://127.0.0.1:5000',
       backendUrl: 'https://hp-heatmap-backend-44nub6ij6q-ez.a.run.app',
       data: null,
       highestValue: null,
@@ -45,11 +46,12 @@ export default {
         }
       },
       viewState: {
-        latitude: 0,
-        longitude: 0.007,
+        latitude: 0.02,
+        longitude: 0.05,
         zoom: 11,
+        minZoom: 2,
         pitch: 40,
-        bearing: 10
+        bearing: -40
       },
       colorSchemes: {
         sequential: [
@@ -115,7 +117,7 @@ export default {
           this.colorGradientPreset = s.gradientPreset.value
           this.colorGradient = chroma
             .scale(this.colorGradientPreset)
-            .domain([this.lowestValue / 100, this.highestValue / 100])
+            .domain([this.lowestValue, this.highestValue])
           settings.updateTriggers = { getFillColor: this.colorGradientPreset }
         }
         settings.elevationScale = Number(s.elevationScale) // This is necessary because Vue.js converts the property to a string.
@@ -150,64 +152,80 @@ export default {
           this.deck.setProps({ effects: [] })
         }
       }
+      this.$emit('longLoadingFinished')
     },
     fetchData: function (url) {
       var payload = new FormData()
       payload.append('url', JSON.stringify(this.$route.query.config))
-      axios.post(url, payload).then(res => {
-        [this.data, this.highestValue, this.lowestValue] = this.processJsonData(res.data)
-      }).catch(error => { console.log(error) })
+      axios
+        .post(url, payload)
+        .then(res => {
+          [
+            this.data,
+            this.highestValue,
+            this.lowestValue
+          ] = this.processJsonData(res.data)
+          console.log(res)
+        })
+        .catch(error => {
+          console.log(error)
+        })
     },
     processJsonData: function (json) {
+      // This could be moved to the python backend for performace reasons
       var data = []
       var rows = Object.keys(json)
       var columns = Object.keys(json[rows[0]])
       var lowestValue = json[rows[0]][columns[4]]
       var highestValue = json[rows[0]][columns[4]]
+      var lastPrefix
+      var columnName
       for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-        var columnCoordinate = 1
-        for (var columnIndex = 1; columnIndex < columns.length; columnIndex++) {
-          if (
-            columns[columnIndex] !== 'start' &&
-            columns[columnIndex] !== 'end' &&
-            columns[columnIndex] !== 'strand' &&
-            columns[columnIndex] !== 'common gene name'
-          ) {
-            var cell = {
-              COORDINATES: [],
-              VALUE: 0
-            }
-            if (columns[columnIndex].startsWith('(')) {
-              columnCoordinate += 2
+        var columnCoordinate = 0
+        for (var columnIndex = 0; columnIndex < columns.length; columnIndex++) {
+          var cell = {
+            COORDINATES: [],
+            VALUE: 0
+          }
+          if (columns[columnIndex].startsWith('(')) {
+            var splitIndex = columns[columnIndex].indexOf(') ')
+            var prefix = columns[columnIndex].slice(0, splitIndex + 1)
+            if (prefix !== lastPrefix) {
+              lastPrefix = prefix
+              columnCoordinate += 1.3
             } else {
               columnCoordinate++
             }
-            cell.COORDINATES.push(rowIndex / 140)
-            cell.COORDINATES.push(columnCoordinate / 140)
-            cell.COLUMN = columns[columnIndex]
-            cell.ROW = rows[rowIndex]
-            cell.VALUE =
-              Math.log(json[rows[rowIndex]][columns[columnIndex]]) /
-              Math.log(2)
-            // cell.VALUE = json[rows[rowIndex]][columns[columnIndex]];
-            data.push(cell)
-            if (
-              cell.VALUE > highestValue &&
-              cell.VALUE !== Infinity &&
-              cell.VALUE !== -Infinity
-            ) {
-              highestValue = cell.VALUE
-            }
-            if (
-              cell.VALUE < lowestValue &&
-              cell.VALUE !== -Infinity &&
-              cell.VALUE !== Infinity
-            ) {
-              lowestValue = cell.VALUE
-            }
+            columnName = columns[columnIndex].slice(splitIndex + 2)
+          } else {
+            columnName = columns[columnIndex]
+          }
+          cell.COORDINATES.push(rowIndex / 140)
+          cell.COORDINATES.push(columnCoordinate / 140)
+          cell.COLUMN = columnName
+          cell.ROW = rows[rowIndex]
+          // cell.VALUE =
+          //   Math.log(json[rows[rowIndex]][columns[columnIndex]]) /
+          //   Math.log(2)
+          cell.VALUE = json[rows[rowIndex]][columns[columnIndex]]
+          data.push(cell)
+          if (
+            cell.VALUE > highestValue &&
+            cell.VALUE !== Infinity &&
+            cell.VALUE !== -Infinity
+          ) {
+            highestValue = cell.VALUE
+          }
+          if (
+            cell.VALUE < lowestValue &&
+            cell.VALUE !== -Infinity &&
+            cell.VALUE !== Infinity
+          ) {
+            lowestValue = cell.VALUE
           }
         }
       }
+      console.log(lowestValue, highestValue)
       return [data, highestValue, lowestValue]
     },
     getTooltip: function ({ object }) {
