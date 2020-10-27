@@ -173,10 +173,9 @@ export default {
     processJsonData: function (json) {
       // This could be moved to the python backend for performace reasons
       var data = []
-      var rows = Object.keys(json)
-      var columns = Object.keys(json[rows[0]])
-      var lowestValue = json[rows[0]][columns[4]]
-      var highestValue = json[rows[0]][columns[4]]
+      var columns = Object.keys(json[0])
+      var lowestValue = 0
+      var highestValue = 0
       var lastPrefix
       var columnName
       var columnCoordinate = 0
@@ -194,7 +193,7 @@ export default {
         } else {
           columnName = columns[columnIndex]
         }
-        for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+        for (var rowIndex = 0; rowIndex < json.length; rowIndex++) {
           var cell = {
             COORDINATES: [],
             VALUE: 0
@@ -202,11 +201,11 @@ export default {
           cell.COORDINATES.push(rowIndex / 140)
           cell.COORDINATES.push(columnCoordinate / 140)
           cell.COLUMN = columnName
-          cell.ROW = rows[rowIndex]
+          cell.ROW = json[rowIndex][columns[0]]
           // cell.VALUE =
           //   Math.log(json[rows[rowIndex]][columns[columnIndex]]) /
           //   Math.log(2)
-          cell.VALUE = json[rows[rowIndex]][columns[columnIndex]]
+          cell.VALUE = json[rowIndex][columns[columnIndex]]
           data.push(cell)
           if (
             cell.VALUE > highestValue &&

@@ -30,7 +30,7 @@
 </div>
 </div>
         <h5 class="title initial_load_text">Loading Heatmap</h5>
-        <small id="subtitle">v0.0.1-alpha</small>
+        <small id="subtitle">v0.0.2-alpha</small>
       </div>
     </div>
 </template>
