@@ -179,25 +179,25 @@ export default {
       var highestValue = json[rows[0]][columns[4]]
       var lastPrefix
       var columnName
-      for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-        var columnCoordinate = 0
-        for (var columnIndex = 0; columnIndex < columns.length; columnIndex++) {
+      var columnCoordinate = 0
+      for (var columnIndex = 0; columnIndex < columns.length; columnIndex++) {
+        if (columns[columnIndex].startsWith('(')) {
+          var splitIndex = columns[columnIndex].indexOf(') ')
+          var prefix = columns[columnIndex].slice(0, splitIndex + 1)
+          if (prefix !== lastPrefix) {
+            lastPrefix = prefix
+            columnCoordinate += 1.4
+          } else {
+            columnCoordinate++
+          }
+          columnName = columns[columnIndex].slice(splitIndex + 2)
+        } else {
+          columnName = columns[columnIndex]
+        }
+        for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
           var cell = {
             COORDINATES: [],
             VALUE: 0
-          }
-          if (columns[columnIndex].startsWith('(')) {
-            var splitIndex = columns[columnIndex].indexOf(') ')
-            var prefix = columns[columnIndex].slice(0, splitIndex + 1)
-            if (prefix !== lastPrefix) {
-              lastPrefix = prefix
-              columnCoordinate += 1.3
-            } else {
-              columnCoordinate++
-            }
-            columnName = columns[columnIndex].slice(splitIndex + 2)
-          } else {
-            columnName = columns[columnIndex]
           }
           cell.COORDINATES.push(rowIndex / 140)
           cell.COORDINATES.push(columnCoordinate / 140)
