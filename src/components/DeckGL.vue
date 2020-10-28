@@ -4,7 +4,7 @@
       <canvas id="deck-canvas" ref="canvas"></canvas>
     </div>
     <settingsMenu
-      v-if="data"
+      v-if="layerSettings.gridCellLayer.data"
       class="settings_menu"
       @settingsChanged="updateSettings"
     />
@@ -18,7 +18,7 @@ import {
   AmbientLight,
   DirectionalLight
 } from '@deck.gl/core'
-import { GridCellLayer } from '@deck.gl/layers'
+import { GridCellLayer, TextLayer } from '@deck.gl/layers'
 import axios from 'axios'
 import settingsMenu from '@/components/settingsMenu.vue'
 import chroma from 'chroma-js'
@@ -30,7 +30,10 @@ export default {
     return {
       // backendUrl: 'http://127.0.0.1:5000',
       backendUrl: 'https://hp-heatmap-backend-44nub6ij6q-ez.a.run.app',
-      data: null,
+      constants: {
+        textMarginRight: -0.003,
+        textMarginTop: 0.5 / 140
+      },
       highestValue: null,
       lowestValue: null,
       colorGradient: null,
@@ -38,11 +41,25 @@ export default {
       advancedLighting: false,
       layerSettings: {
         gridCellLayer: {
-          id: 'grid-cell-layer',
+          id: 'grid-gridCellLayerCell-layer',
+          data: null,
           getPosition: d => d.COORDINATES,
           getElevation: d => d.VALUE,
           getFillColor: d => this.colorGradient(d.VALUE).rgb(),
           updateTriggers: { getFillColor: this.colorGradientPreset }
+        },
+        textLayer: {
+          id: 'row-text-layer',
+          data: null,
+          sizeUnits: 'meters',
+          getPosition: d => d.COORDINATES,
+          getText: d => d.VALUE,
+          getSize: 450,
+          getAngle: 90,
+          getTextAnchor: 'end',
+          getAlignmentBaseline: 'center',
+          billboard: false,
+          fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, sans-serif'
         }
       },
       viewState: {
@@ -112,7 +129,6 @@ export default {
       // It might be useful to use a switch case instead, if the possible conditions grow beyond 5 items.
       if (updatedSettings.type === 'layer') {
         const settings = Object.assign(s, this.layerSettings.gridCellLayer)
-        settings.data = this.data
         if (this.colorGradientPreset !== s.gradientPreset.value) {
           this.colorGradientPreset = s.gradientPreset.value
           this.colorGradient = chroma
@@ -121,7 +137,7 @@ export default {
           settings.updateTriggers = { getFillColor: this.colorGradientPreset }
         }
         settings.elevationScale = Number(s.elevationScale) // This is necessary because Vue.js converts the property to a string.
-        this.deck.setProps({ layers: [new GridCellLayer(settings)] })
+        this.deck.setProps({ layers: [new GridCellLayer(settings), new TextLayer(this.layerSettings.textLayer)] })
       } else if (updatedSettings.type === 'lighting') {
         if (s.advancedLighting === true) {
           // Only build new lights when advanced light is activated. Probably not necessary but I speculate on performance advantages with this approach.
@@ -161,7 +177,8 @@ export default {
         .post(url, payload)
         .then(res => {
           [
-            this.data,
+            this.layerSettings.gridCellLayer.data,
+            this.layerSettings.textLayer.data,
             this.highestValue,
             this.lowestValue
           ] = this.processJsonData(res.data)
@@ -172,7 +189,8 @@ export default {
     },
     processJsonData: function (json) {
       // This could be moved to the python backend for performace reasons
-      var data = []
+      var gridCellLayerData = []
+      var textLayerData = []
       var columns = Object.keys(json[0])
       var lowestValue = 0
       var highestValue = 0
@@ -193,37 +211,38 @@ export default {
         } else {
           columnName = columns[columnIndex]
         }
+        var scaledColumnCoordinate = columnCoordinate / 140 // Only calculate x coordinate when the column changes
         for (var rowIndex = 0; rowIndex < json.length; rowIndex++) {
-          var cell = {
-            COORDINATES: [],
-            VALUE: 0
+          var gridCellLayerCell = {
+            COLUMN: columnName,
+            COORDINATES: [rowIndex / 140, scaledColumnCoordinate],
+            ROW: json[rowIndex][columns[0]],
+            VALUE: json[rowIndex][columns[columnIndex]]
           }
-          cell.COORDINATES.push(rowIndex / 140)
-          cell.COORDINATES.push(columnCoordinate / 140)
-          cell.COLUMN = columnName
-          cell.ROW = json[rowIndex][columns[0]]
-          // cell.VALUE =
-          //   Math.log(json[rows[rowIndex]][columns[columnIndex]]) /
-          //   Math.log(2)
-          cell.VALUE = json[rowIndex][columns[columnIndex]]
-          data.push(cell)
+          gridCellLayerData.push(gridCellLayerCell)
           if (
-            cell.VALUE > highestValue &&
-            cell.VALUE !== Infinity &&
-            cell.VALUE !== -Infinity
+            gridCellLayerCell.VALUE > highestValue &&
+            gridCellLayerCell.VALUE !== Infinity &&
+            gridCellLayerCell.VALUE !== -Infinity
           ) {
-            highestValue = cell.VALUE
+            highestValue = gridCellLayerCell.VALUE
           }
           if (
-            cell.VALUE < lowestValue &&
-            cell.VALUE !== -Infinity &&
-            cell.VALUE !== Infinity
+            gridCellLayerCell.VALUE < lowestValue &&
+            gridCellLayerCell.VALUE !== -Infinity &&
+            gridCellLayerCell.VALUE !== Infinity
           ) {
-            lowestValue = cell.VALUE
+            lowestValue = gridCellLayerCell.VALUE
+          }
+          if (columnIndex === 0) {
+            textLayerData.push({
+              COORDINATES: [gridCellLayerCell.COORDINATES[0] + this.constants.textMarginTop, this.constants.textMarginRight],
+              VALUE: gridCellLayerCell.ROW
+            })
           }
         }
       }
-      return [data, highestValue, lowestValue]
+      return [gridCellLayerData, textLayerData, highestValue, lowestValue]
     },
     getTooltip: function ({ object }) {
       if (!object) {
