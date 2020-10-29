@@ -1,11 +1,12 @@
 <template>
   <div>
+    <cameraMenu class="camera_menu menu_c" :activeCamera="activeCamera" @active-camera-selected="activeCamera = $event"/>
     <div class="deck-container">
       <canvas id="deck-canvas" ref="canvas"></canvas>
     </div>
     <settingsMenu
       v-if="layerSettings.gridCellLayer.data"
-      class="settings_menu"
+      class="settings_menu menu_c"
       @settingsChanged="updateSettings"
     />
   </div>
@@ -21,15 +22,18 @@ import {
 import { GridCellLayer, TextLayer } from '@deck.gl/layers'
 import axios from 'axios'
 import settingsMenu from '@/components/settingsMenu.vue'
+import cameraMenu from '@/components/cameraMenu.vue'
 import chroma from 'chroma-js'
 export default {
   components: {
-    settingsMenu
+    settingsMenu,
+    cameraMenu
   },
   data () {
     return {
       // backendUrl: 'http://127.0.0.1:5000',
       backendUrl: 'https://hp-heatmap-backend-44nub6ij6q-ez.a.run.app',
+      activeCamera: '3D',
       constants: {
         textMarginRight: -0.003,
         textMarginTop: 0.5 / 140
@@ -188,7 +192,7 @@ export default {
         })
     },
     processJsonData: function (json) {
-      // This could be moved to the python backend for performace reasons
+      // This could be moved to the python backend for performace reasons.
       var gridCellLayerData = []
       var textLayerData = []
       var columns = Object.keys(json[0])
@@ -211,7 +215,7 @@ export default {
         } else {
           columnName = columns[columnIndex]
         }
-        var scaledColumnCoordinate = columnCoordinate / 140 // Only calculate x coordinate when the column changes
+        var scaledColumnCoordinate = columnCoordinate / 140 // Only calculate x coordinate when the column changes.
         for (var rowIndex = 0; rowIndex < json.length; rowIndex++) {
           var gridCellLayerCell = {
             COLUMN: columnName,
@@ -273,7 +277,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .deck-container {
   width: 100vw;
   height: 100vh;
@@ -286,9 +290,15 @@ export default {
   left: 0;
 }
 .settings_menu {
-  position: absolute;
   top: 10px;
   left: 10px;
+}
+.camera_menu {
+  top: 10px;
+  right: 10px;
+}
+.menu_c {
+  position: absolute;
   z-index: 1000;
 }
 </style>
