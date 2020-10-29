@@ -1,6 +1,6 @@
 <template>
   <div>
-    <cameraMenu class="camera_menu menu_c" :activeCamera="activeCamera" @active-camera-selected="activeCamera = $event"/>
+    <cameraMenu class="camera_menu menu_c" :activeCamera="activeCamera" @active-camera-selected="changeCamera"/>
     <div class="deck-container">
       <canvas id="deck-canvas" ref="canvas"></canvas>
     </div>
@@ -31,8 +31,8 @@ export default {
   },
   data () {
     return {
-      // backendUrl: 'http://127.0.0.1:5000',
-      backendUrl: 'https://hp-heatmap-backend-44nub6ij6q-ez.a.run.app',
+      backendUrl: 'http://127.0.0.1:5000',
+      // backendUrl: 'https://hp-heatmap-backend-44nub6ij6q-ez.a.run.app',
       activeCamera: '3D',
       constants: {
         textMarginRight: -0.003,
@@ -66,7 +66,7 @@ export default {
           fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, sans-serif'
         }
       },
-      viewState: {
+      currentViewState: {
         latitude: 0.02,
         longitude: 0.05,
         zoom: 11,
@@ -121,27 +121,38 @@ export default {
   mounted () {
     this.deck = new Deck({
       canvas: this.$refs.canvas,
-      initialViewState: this.viewState,
-      controller: true,
-      getTooltip: this.getTooltip
+      viewState: this.currentViewState,
+      getTooltip: this.getTooltip,
+      onViewStateChange: ({ viewState }) => {
+        this.currentViewState = viewState
+        this.deck.setProps({ viewState: this.currentViewState })
+      },
+      controller: true
     })
     // this.deck.layerManager.layers[0].props.elevationScale = 10
   },
   methods: {
+    changeCamera (e) {
+      this.activeCamera = e.id
+      this.currentViewState = Object.assign({}, this.currentViewState, e.viewState)
+      this.layerSettings.gridCellLayer = Object.assign({}, this.layerSettings.gridCellLayer, e.layerSettings.gridCellLayer)
+      this.deck.setProps({ viewState: this.currentViewState })
+      this.deck.setProps({ layers: [new GridCellLayer(this.layerSettings.gridCellLayer), new TextLayer(this.layerSettings.textLayer)] })
+    },
     updateSettings (updatedSettings) {
       const s = updatedSettings.settings
       // It might be useful to use a switch case instead, if the possible conditions grow beyond 5 items.
       if (updatedSettings.type === 'layer') {
-        const settings = Object.assign(s, this.layerSettings.gridCellLayer)
+        this.layerSettings.gridCellLayer = Object.assign(s, this.layerSettings.gridCellLayer)
         if (this.colorGradientPreset !== s.gradientPreset.value) {
           this.colorGradientPreset = s.gradientPreset.value
           this.colorGradient = chroma
             .scale(this.colorGradientPreset)
             .domain([this.lowestValue, this.highestValue])
-          settings.updateTriggers = { getFillColor: this.colorGradientPreset }
+          this.layerSettings.gridCellLayer.updateTriggers = { getFillColor: this.colorGradientPreset }
         }
-        settings.elevationScale = Number(s.elevationScale) // This is necessary because Vue.js converts the property to a string.
-        this.deck.setProps({ layers: [new GridCellLayer(settings), new TextLayer(this.layerSettings.textLayer)] })
+        this.layerSettings.gridCellLayer.elevationScale = Number(s.elevationScale) // This is necessary because Vue.js converts the property to a string.
+        this.deck.setProps({ layers: [new GridCellLayer(this.layerSettings.gridCellLayer), new TextLayer(this.layerSettings.textLayer)] })
       } else if (updatedSettings.type === 'lighting') {
         if (s.advancedLighting === true) {
           // Only build new lights when advanced light is activated. Probably not necessary but I speculate on performance advantages with this approach.

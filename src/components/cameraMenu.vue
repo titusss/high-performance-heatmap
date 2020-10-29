@@ -1,7 +1,7 @@
 <template>
   <div class="main_parent">
     <div class="buttons_background">
-      <div @click="$emit('active-camera-selected', option.id)" class="option_button" :class="{ option_button_active: activeCamera === option.id }" v-for="option in cameraOptions" :key="option.id">
+      <div @click="$emit('active-camera-selected', option)" class="option_button" :class="{ option_button_active: activeCamera === option.id }" v-for="option in cameraOptions" :key="option.id">
         <img class="option_icon" :src="require(`@/assets/${option.id}.svg`)" />
       </div>
       </div>
@@ -17,10 +17,54 @@ export default {
   data () {
     return {
       cameraOptions: [
-        { id: '3D' },
-        { id: 'Top' },
-        { id: 'Side' },
-        { id: 'Front' }
+        {
+          id: '3D',
+          viewState: {
+            pitch: 40,
+            bearing: -40
+          },
+          layerSettings: {
+            gridCellLayer: {
+              extruded: true
+            }
+          }
+        },
+        {
+          id: 'Top',
+          viewState: {
+            pitch: 0,
+            bearing: -90
+          },
+          layerSettings: {
+            gridCellLayer: {
+              extruded: false
+            }
+          }
+        },
+        {
+          id: 'Side',
+          viewState: {
+            pitch: 90,
+            bearing: 0
+          },
+          layerSettings: {
+            gridCellLayer: {
+              extruded: true
+            }
+          }
+        },
+        {
+          id: 'Front',
+          viewState: {
+            pitch: 90,
+            bearing: 90
+          },
+          layerSettings: {
+            gridCellLayer: {
+              extruded: true
+            }
+          }
+        }
       ]
     }
   }
