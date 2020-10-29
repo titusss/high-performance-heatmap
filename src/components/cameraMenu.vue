@@ -42,9 +42,6 @@ export default {
   grid-template-rows: repeat(2, aut0);
   grid-row-gap: 10px;
 }
-.option_icon {
-  max-height: 18px;
-}
 label {
   font-size: 14px;
   grid-area: 2 / auto / auto / auto;
