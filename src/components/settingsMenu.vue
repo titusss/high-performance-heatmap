@@ -93,13 +93,22 @@
 <script>
 import settingsTemplate from '@/assets/settingsTemplate.json'
 export default {
+  props: {
+    globalSettings: Object
+  },
   data () {
     return {
       settingsTemplate,
-      settings: {}
+      settings: null
     }
   },
   watch: {
+    globalSettings: {
+      handler: function () {
+        this.settings = this.globalSettings
+      },
+      deep: true
+    },
     'settings.layer': {
       handler: function () {
         this.$emit('settingsChanged', { type: 'layer', settings: this.settings.layer })

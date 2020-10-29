@@ -8,6 +8,7 @@
       v-if="layerSettings.gridCellLayer.data"
       class="settings_menu menu_c"
       @settingsChanged="updateSettings"
+      :globalSettings="layerSettings.gridCellLayer"
     />
   </div>
 </template>
@@ -31,8 +32,8 @@ export default {
   },
   data () {
     return {
-      backendUrl: 'http://127.0.0.1:5000',
-      // backendUrl: 'https://hp-heatmap-backend-44nub6ij6q-ez.a.run.app',
+      // backendUrl: 'http://127.0.0.1:5000',
+      backendUrl: 'https://hp-heatmap-backend-44nub6ij6q-ez.a.run.app',
       activeCamera: '3D',
       constants: {
         textMarginRight: -0.003,
@@ -136,6 +137,7 @@ export default {
       this.activeCamera = e.id
       this.currentViewState = Object.assign({}, this.currentViewState, e.viewState)
       this.layerSettings.gridCellLayer = Object.assign({}, this.layerSettings.gridCellLayer, e.layerSettings.gridCellLayer)
+      console.log(this.layerSettings.gridCellLayer)
       this.deck.setProps({ viewState: this.currentViewState })
       this.deck.setProps({ layers: [new GridCellLayer(this.layerSettings.gridCellLayer), new TextLayer(this.layerSettings.textLayer)] })
     },
