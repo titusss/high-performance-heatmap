@@ -16,15 +16,30 @@ on:
 env:
   # TODO: Change variable to your image's name.
   IMAGE_NAME: high-performance-heatmap
+  
   OS_AUTH_URL: https://keystone-tank.desy.de:5000/v3/
   OS_APPLICATION_SECRET_NAME: ${{ secrets.OS_APPLICATION_SECRET_NAME }}
   OS_APPLICATION_CREDENTIAL_SECRET: ${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}
   OS_APPLICATION_CREDENTIAL_ID: ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
   OS_AUTH_TYPE: v3applicationcredential
 
+  STACK_NAME: os-145-test-schuh-hifis
+  STACK_PARS: configs/deployment.yaml
+  STACK_FILE: configs/server.yml
+
 jobs:
+  
+  # Create or update the OpenStack stack.
   os-proj-test-gitlab:
-    runs-on: eosc-pan-git.desy.de:5555/openstack/os-ci:latest
+    runs-on: ubuntu-latest
+    container: eosc-pan-git.desy.de:5555/openstack/os-ci:latest
+    
+    steps: 
+      - name: Initialize OpenStack
+        run: |
+          source scripts/keystone-openrc.sh
+          scripts/create-or-update-stack.sh
+          openstack stack list
     
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
