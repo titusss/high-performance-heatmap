@@ -1,0 +1,83 @@
+heat_template_version: 2018-03-02
+description: Demo Server that runs a Docker Container with a mounted volume attachement
+
+parameters:
+  server_name:
+    type: string
+    label: server-name
+    description: Name of server
+  key_name:
+    type: string
+    label: key
+    description: Name of key-pair for server
+    constraints:
+      - custom_constraint: nova.keypair
+  image:
+    type: string
+    label: image
+    description: Image used for server
+    default: ubuntu-18-1907-docker 
+  flavor:
+    type: string   
+    label: flavor
+    description: Flavor used for server 
+    default: m1.small
+
+  network_id: 
+    type: string
+    label: network_id
+    description: Network ID for fixed server ip 
+  secgroups: 
+    type: comma_delimited_list
+    label: secgroups
+    description: Security groups for server as comma joined string (groupA,groupB,groupC)
+  log_vol_name:
+    type: string
+    description: Name of volume to attach to the server
+  log_vol_size:
+    type: number
+    description: Size of volume to attach to server
+    default: 1
+    constraints:
+      - range: { min: 1, max: 10 }
+
+
+resources:
+  server:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: server_name }
+      key_name: { get_param: key_name }
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      networks:
+        - network: { get_param: network_id }
+      security_groups: { get_param: secgroups }
+      user_data: {get_file: user-data.yml}    
+      user_data_format: RAW
+  vol_log:
+    type: OS::Cinder::Volume
+    properties:
+      description: volume for logs
+      name: { get_param: log_vol_name } 
+      size: { get_param: log_vol_size }
+  vol_attachement_log:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      volume_id: { get_resource: vol_log }
+      instance_uuid: { get_resource: server }
+      mountpoint: /dev/vdb 
+
+outputs:
+  # optional declaration of output parameters
+  server_ip:
+    description: The IP address of the server
+    value: { get_attr: [server, first_address] }
+  server_name:
+    description: Name of the server
+    value: { get_attr: [ server, name ] }
+
+
+          
+  # optional declaration of conditions
+
