@@ -16,8 +16,16 @@ on:
 env:
   # TODO: Change variable to your image's name.
   IMAGE_NAME: high-performance-heatmap
+  OS_AUTH_URL: https://keystone-tank.desy.de:5000/v3/
+  OS_APPLICATION_SECRET_NAME: ${{ secrets.OS_APPLICATION_SECRET_NAME }}
+  OS_APPLICATION_CREDENTIAL_SECRET: ${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}
+  OS_APPLICATION_CREDENTIAL_ID: ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
+  OS_AUTH_TYPE: v3applicationcredential
 
 jobs:
+  os-proj-test-gitlab:
+    runs-on: eosc-pan-git.desy.de:5555/openstack/os-ci:latest
+    
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
   test:
