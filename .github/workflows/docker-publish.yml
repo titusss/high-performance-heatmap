@@ -46,6 +46,7 @@ jobs:
           args: '"login"'
           token: ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
           url: ${{ secrets.RANCHER_URL }}
+          context: ${{ secrets.RANCHER_CONTEXT }}
       
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
