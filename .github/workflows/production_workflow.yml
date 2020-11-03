@@ -84,11 +84,6 @@ jobs:
           docker tag $IMAGE_NAME $IMAGE_ID:$GITHUB_SHA
           docker push $IMAGE_ID:$GITHUB_SHA
   
-  rancher:
-    needs: push
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
       - name: Login to Rancher and update Kubernetes
         run:  |
           CLUSTER_PROJECT_ID=c-kmghz:p-fj98k
