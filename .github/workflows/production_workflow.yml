@@ -75,6 +75,7 @@ jobs:
           echo VERSION=$VERSION
           echo GITHUB_SHA=$GITHUB_SHA
           echo IMAGE_ID:GITHUB_SHA=$IMAGE_ID:$GITHUB_SHA
+          export DOCKER_IMAGE_ID=$IMAGE_ID:$GITHUB_SHA
           
           # Use latest naming convention (Alternative)
           # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
@@ -83,7 +84,12 @@ jobs:
           # Use commit SHA as version tag (Renders $VERSION unnecessary)
           docker tag $IMAGE_NAME $IMAGE_ID:$GITHUB_SHA
           docker push $IMAGE_ID:$GITHUB_SHA
-  
+          
+  rancher:
+    needs: push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
       - name: Login to Rancher and update Kubernetes
         run:  |
           CLUSTER_PROJECT_ID=c-kmghz:p-fj98k
@@ -91,6 +97,8 @@ jobs:
           
           # Replace placeholder image name with image path id
           pwd
+          echo $IMAGE_ID
+          echo $DOCKER_IMAGE_ID
           echo $IMAGE_ID:$GITHUB_SHA
           cd .github/kubernetes
           sed -i "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" deployment.yml
