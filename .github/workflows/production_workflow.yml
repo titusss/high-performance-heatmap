@@ -84,9 +84,6 @@ jobs:
           docker tag $IMAGE_NAME $IMAGE_ID:$GITHUB_SHA
           docker push $IMAGE_ID:$GITHUB_SHA
           
-          CLUSTER_PROJECT_ID=c-kmghz:p-fj98k
-          RANCHER_NAMESPACE=hiri
-          
           echo Replace placeholder image name with image path id
           cd .github/kubernetes
           sed -i "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" deployment.yml
@@ -94,6 +91,9 @@ jobs:
 
       - name: Rancher
         run: |
+          CLUSTER_PROJECT_ID=c-kmghz:p-fj98k
+          RANCHER_NAMESPACE=hiri
+          
           echo Download Rancher
           # Download Rancher binary from official rancher website
           wget https://releases.rancher.com/cli2/v2.4.6/rancher-linux-amd64-v2.4.6.tar.gz
