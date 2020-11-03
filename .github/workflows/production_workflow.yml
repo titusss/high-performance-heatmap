@@ -92,20 +92,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Replace placeholders in kubernetes yml
-        run:  |
-          pwd
-          echo $GITHUB_REPOSITORY
-          ls .github
-          ls .github/kubernetes
-          cat .github/kubernetes/deployment.yml
-          sed "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" .github/kubernetes/deployment.yml
-          cat .github/kubernetes/deployment.yml
-          
       - name: Login to Rancher and update Kubernetes
         run:  |
           CLUSTER_PROJECT_ID=c-kmghz:p-fj98k
           RANCHER_NAMESPACE=hiri
+          
+          # Replace placeholder image name with image path id
+          cat .github/kubernetes/deployment.yml
+          sed "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" .github/kubernetes/deployment.yml
+          cat .github/kubernetes/deployment.yml
           
           wget https://releases.rancher.com/cli2/v2.4.6/rancher-linux-amd64-v2.4.6.tar.gz
           tar -xvzf rancher-linux-amd64-v2.4.6.tar.gz
@@ -114,5 +109,5 @@ jobs:
           ./rancher login ${{ secrets.RANCHER_URL }} --token ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
           ./rancher context switch $CLUSTER_PROJECT_ID
           
-          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f .github/kubernetes/
+          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f .github/kubernetes
         
