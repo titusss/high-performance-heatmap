@@ -51,7 +51,8 @@ jobs:
 
       - name: Build image
         run: |
-         docker build . --file Dockerfile --tag $IMAGE_NAME
+          ls .github
+          docker build . --file Dockerfile --tag $IMAGE_NAME
 
       - name: Log into GitHub Container Registry
       # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
@@ -92,6 +93,8 @@ jobs:
     steps:
       - name: Replace placeholders in kubernetes yml
         run:  |
+          pwd
+          echo $GITHUB_REPOSITORY
           ls .github
           ls .github/kubernetes
           cat .github/kubernetes/deployment.yml
