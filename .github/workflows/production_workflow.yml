@@ -30,7 +30,10 @@ jobs:
       - name: Run tests
         run: |
           pwd
-          
+          echo $GITHUB_EVENT_PATH
+          echo $GITHUB_REPOSITORY
+          ls /home/runner/work/high-performance-heatmap/high-performance-heatmap/.github/workflows
+          cat /home/runner/work/high-performance-heatmap/high-performance-heatmap/.github/workflows/kubernetes_deployment.yml
           if [ -f docker-compose.test.yml ]; then
             docker-compose --file docker-compose.test.yml build
             docker-compose --file docker-compose.test.yml run sut
