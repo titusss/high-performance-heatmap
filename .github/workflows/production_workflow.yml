@@ -29,7 +29,6 @@ jobs:
 
       - name: Run tests
         run: |
-          ls ../
           if [ -f docker-compose.test.yml ]; then
             docker-compose --file docker-compose.test.yml build
             docker-compose --file docker-compose.test.yml run sut
@@ -91,9 +90,9 @@ jobs:
     steps:
       - name: Replace placeholders in kubernetes yml
         run:  |
-          cat ../kubernetes/deployment.yml
-          sed "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" ../kubernetes/deployment.yml
-          cat ../kubernetes/deployment.yml
+          cat high-performance-heatmap/.github/kubernetes/deployment.yml
+          sed "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" high-performance-heatmap/.github/kubernetes/deployment.yml
+          cat high-performance-heatmap/.github/kubernetes/deployment.yml
           
       - name: Login to Rancher and update Kubernetes
         run:  |
@@ -107,5 +106,5 @@ jobs:
           ./rancher login ${{ secrets.RANCHER_URL }} --token ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
           ./rancher context switch $CLUSTER_PROJECT_ID
           
-          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ../kubernetes
+          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f high-performance-heatmap/.github/kubernetes/
         
