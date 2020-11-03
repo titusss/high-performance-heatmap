@@ -29,6 +29,7 @@ jobs:
 
       - name: Run tests
         run: |
+          echo $PATH
           if [ -f docker-compose.test.yml ]; then
             docker-compose --file docker-compose.test.yml build
             docker-compose --file docker-compose.test.yml run sut
@@ -50,7 +51,6 @@ jobs:
 
       - name: Build image
         run: |
-         echo */
          docker build . --file Dockerfile --tag $IMAGE_NAME
 
       - name: Log into GitHub Container Registry
