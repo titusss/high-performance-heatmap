@@ -87,7 +87,6 @@ jobs:
           echo Replace placeholder image name with image path id
           cd .github/kubernetes
           sed -i "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" deployment.yml
-          cd ..
 
       - name: Rancher
         run: |
@@ -105,4 +104,4 @@ jobs:
           ./rancher context switch $CLUSTER_PROJECT_ID
           
           echo Apply new Kubernetes configurations
-          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ../kubernetes
+          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ../.github/kubernetes
