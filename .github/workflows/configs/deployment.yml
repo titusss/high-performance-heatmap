@@ -1,9 +1,0 @@
-parameters:
-  server_name: os-145-test-schuh-hifis
-  key_name: schuh-fedcloud-key
-  image: ubuntu-20-focal
-  flavor: m1.small
-  network_id: eaab545b-b1e0-49a7-be18-1a5501ad1758
-  secgroups: "web,ssh,default"
-  log_vol_name: os-145-test-schuh-hifis-panosc-logs
-  log_vol_size: 1
