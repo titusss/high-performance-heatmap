@@ -32,6 +32,7 @@ jobs:
           pwd
           echo $GITHUB_EVENT_PATH
           echo $GITHUB_REPOSITORY
+          ls .github/workflows
           ls /home/runner/work/high-performance-heatmap/high-performance-heatmap/.github/workflows
           cat /home/runner/work/high-performance-heatmap/high-performance-heatmap/.github/workflows/kubernetes_deployment.yml
           if [ -f docker-compose.test.yml ]; then
