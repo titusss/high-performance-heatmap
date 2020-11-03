@@ -29,9 +29,7 @@ jobs:
 
       - name: Run tests
         run: |
-          echo $PATH
-          ls $PATH/high-performance-heatmap/
-          ls $PATH/chinapwn/high-performance-heatmap/.github
+          cat kubernetes_deployment.yml
           
           if [ -f docker-compose.test.yml ]; then
             docker-compose --file docker-compose.test.yml build
@@ -95,10 +93,9 @@ jobs:
     steps:
       - name: Replace placeholders in kubernetes yml
         run:  |
-          echo */
-          cat high-performance-heatmap/.github/kubernetes/deployment.yml
-          sed "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" high-performance-heatmap/.github/kubernetes/deployment.yml
-          cat high-performance-heatmap/.github/kubernetes/deployment.yml
+          cat kubernetes_deployment.yml
+          sed "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" kubernetes_deployment.yml
+          cat kubernetes_deployment.yml
           
       - name: Login to Rancher and update Kubernetes
         run:  |
