@@ -91,6 +91,7 @@ jobs:
     needs: push
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Replace placeholders in kubernetes yml
         run:  |
           pwd
