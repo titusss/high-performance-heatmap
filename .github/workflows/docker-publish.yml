@@ -78,13 +78,20 @@ jobs:
           docker push $IMAGE_ID:$VERSION
   
   rancher:
+    needs: push
     runs-on: ubuntu-latest
     steps:
-      - name: Login to Rancher
+      - name: Login to Rancher and update Kubernetes
         run:  |
+          PROJECT_ID=p-fj98k
+          RANCHER_NAMESPACE=hiri
+          
           wget https://releases.rancher.com/cli2/v2.4.6/rancher-linux-amd64-v2.4.6.tar.gz
           tar -xvzf rancher-linux-amd64-v2.4.6.tar.gz
           cd rancher-v2.4.6/
+          
           ./rancher login ${{ secrets.RANCHER_URL }} --token ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
-          ./rancher context switch
+          ./rancher context switch $PROJECT_ID
+          
+          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ./kubernetes
         
