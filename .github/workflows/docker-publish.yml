@@ -46,7 +46,7 @@ jobs:
           url: ${{ secrets.RANCHER_URL }}
           token: ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
           context: ${{ secrets.RANCHER_CONTEXT }}
-          args: '"login"'
+          args: '"clusters"'
       
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
