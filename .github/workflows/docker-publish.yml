@@ -35,18 +35,6 @@ jobs:
           else
             docker build . --file Dockerfile
           fi
-          
-  # Login to rancher
-  rancher:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Rancher Action
-        uses: colbyhill21/Rancher-Action@1.1
-        with: 
-          url: ${{ secrets.RANCHER_URL }}
-          token: ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
-          context: ${{ secrets.RANCHER_CONTEXT }}
-          args: '"clusters"'
       
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
@@ -88,3 +76,14 @@ jobs:
 
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
+  
+  rancher:
+    needs: push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Rancher
+        run:  |
+          wget https://releases.rancher.com/cli2/v2.4.6/rancher-linux-amd64-v2.4.6.tar.gz
+          ./rancher login ${{ secrets.RANCHER_URL }} --token ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
+          ./rancher context switch
+        
