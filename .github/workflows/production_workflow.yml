@@ -95,20 +95,18 @@ jobs:
           RANCHER_NAMESPACE=hiri
           
           # Replace placeholder image name with image path id
-          sed "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" .github/kubernetes/deployment.yml
-
+          pwd
+          echo $IMAGE_ID:$GITHUB_SHA
+          cd .github/kubernetes
+          sed -i "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" deployment.yml
+          cat deployment.yml
+          cd ..
           
           wget https://releases.rancher.com/cli2/v2.4.6/rancher-linux-amd64-v2.4.6.tar.gz
           tar -xvzf rancher-linux-amd64-v2.4.6.tar.gz
           cd rancher-v2.4.6/
-
+          
+          pwd
           ./rancher login ${{ secrets.RANCHER_URL }} --token ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
           ./rancher context switch $CLUSTER_PROJECT_ID
-          
-          echo moin
-          cat ../.github/kubernetes/deployment.yml
-          echo hallo
-          
-          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ../.github/kubernetes
-          pwd
-          ls ../        
+          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ../kubernetes
