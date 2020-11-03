@@ -30,6 +30,9 @@ jobs:
       - name: Run tests
         run: |
           echo $PATH
+          echo $PATH/high-performance-heatmap/
+          echo $PATH/chinapwn/high-performance-heatmap/.github
+          
           if [ -f docker-compose.test.yml ]; then
             docker-compose --file docker-compose.test.yml build
             docker-compose --file docker-compose.test.yml run sut
