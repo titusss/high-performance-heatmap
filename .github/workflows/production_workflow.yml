@@ -58,7 +58,7 @@ jobs:
       - name: Push image to GitHub Container Registry
         run: |
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
-
+          
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
@@ -73,14 +73,27 @@ jobs:
 
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
-
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          echo GITHUB_SHA=$GITHUB_SHA
+          echo IMAGE_ID:GITHUB_SHA=$IMAGE_ID:$GITHUB_SHA
+          
+          # Use latest naming convention (Alternative)
+          # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          # docker push $IMAGE_ID:$VERSION
+          
+          # Use commit SHA as version tag (Renders $VERSION unnecessary)
+          docker tag $IMAGE_NAME $IMAGE_ID:$GITHUB_SHA
+          docker push $IMAGE_ID:$GITHUB_SHA
   
   rancher:
     needs: push
     runs-on: ubuntu-latest
     steps:
+      - name: Replace placeholders in kubernetes yml
+        run:  |
+          cat ../kubernetes/deployment.yml
+          sed "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" ../kubernetes/deployment.yml
+          cat ../kubernetes/deployment.yml
+          
       - name: Login to Rancher and update Kubernetes
         run:  |
           CLUSTER_PROJECT_ID=c-kmghz:p-fj98k
@@ -93,5 +106,5 @@ jobs:
           ./rancher login ${{ secrets.RANCHER_URL }} --token ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
           ./rancher context switch $CLUSTER_PROJECT_ID
           
-          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ./kubernetes
+          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ../kubernetes
         
