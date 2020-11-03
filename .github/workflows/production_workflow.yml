@@ -105,5 +105,5 @@ jobs:
           ./rancher context switch $CLUSTER_PROJECT_ID
           
           ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ../.github/kubernetes
-          cat ../.github/kubernetes/deployment.yml
-        
+          pwd
+          ls ../        
