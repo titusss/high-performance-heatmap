@@ -29,7 +29,7 @@ jobs:
 
       - name: Run tests
         run: |
-          cat kubernetes_deployment.yml
+          pwd
           
           if [ -f docker-compose.test.yml ]; then
             docker-compose --file docker-compose.test.yml build
