@@ -83,7 +83,7 @@ jobs:
     steps:
       - name: Login to Rancher and update Kubernetes
         run:  |
-          PROJECT_ID=p-fj98k
+          CLUSTER_PROJECT_ID=c-kmghz:p-fj98k
           RANCHER_NAMESPACE=hiri
           
           wget https://releases.rancher.com/cli2/v2.4.6/rancher-linux-amd64-v2.4.6.tar.gz
@@ -91,7 +91,7 @@ jobs:
           cd rancher-v2.4.6/
           
           ./rancher login ${{ secrets.RANCHER_URL }} --token ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
-          ./rancher context switch $PROJECT_ID
+          ./rancher context switch $CLUSTER_PROJECT_ID
           
           ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ./kubernetes
         
