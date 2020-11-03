@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: high-performance-heatmap-vue-js
+  labels:
+    app: high-performance-heatmap-vue-js
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: high-performance-heatmap-vue-js
+  template:
+    metadata:
+      labels:
+        app: high-performance-heatmap-vue-js
+    spec:
+      containers:
+      - name: high-performance-heatmap-vue-js
+        image: ghcr.io/chinapwn/high-performance-heatmap
+        ports:
+        - containerPort: 8080
+      imagePullSecrets:
+      - name: githubdockerregistry
