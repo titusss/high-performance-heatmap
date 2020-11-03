@@ -91,6 +91,8 @@ jobs:
     steps:
       - name: Replace placeholders in kubernetes yml
         run:  |
+          ls .github
+          ls .github/kubernetes
           cat .github/kubernetes/deployment.yml
           sed "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" .github/kubernetes/deployment.yml
           cat .github/kubernetes/deployment.yml
