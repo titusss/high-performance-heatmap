@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: high-performance-heatmap-vue-js
-        image: ghcr.io/chinapwn/high-performance-heatmap
+        image: {{image_name_placeholder}}
         ports:
         - containerPort: 8080
       imagePullSecrets:
