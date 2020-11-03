@@ -43,10 +43,10 @@ jobs:
       - name: Rancher Action
         uses: colbyhill21/Rancher-Action@1.1
         with: 
-          args: '"login"'
-          token: ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
           url: ${{ secrets.RANCHER_URL }}
+          token: ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
           context: ${{ secrets.RANCHER_CONTEXT }}
+          args: '"login"'
       
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
