@@ -75,7 +75,6 @@ jobs:
           echo VERSION=$VERSION
           echo GITHUB_SHA=$GITHUB_SHA
           echo IMAGE_ID:GITHUB_SHA=$IMAGE_ID:$GITHUB_SHA
-          export DOCKER_IMAGE_ID=$IMAGE_ID:$GITHUB_SHA
           
           # Use latest naming convention (Alternative)
           # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
@@ -85,17 +84,10 @@ jobs:
           docker tag $IMAGE_NAME $IMAGE_ID:$GITHUB_SHA
           docker push $IMAGE_ID:$GITHUB_SHA
           
-  rancher:
-    needs: push
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Login to Rancher and update Kubernetes
-        run:  |
           CLUSTER_PROJECT_ID=c-kmghz:p-fj98k
           RANCHER_NAMESPACE=hiri
           
-          # Replace placeholder image name with image path id
+          echo Replace placeholder image name with image path id
           pwd
           echo $IMAGE_ID
           echo $DOCKER_IMAGE_ID
@@ -104,12 +96,15 @@ jobs:
           sed -i "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" deployment.yml
           cat deployment.yml
           cd ..
-          
+
+          echo Download Rancher
           wget https://releases.rancher.com/cli2/v2.4.6/rancher-linux-amd64-v2.4.6.tar.gz
           tar -xvzf rancher-linux-amd64-v2.4.6.tar.gz
           cd rancher-v2.4.6/
           
-          pwd
+          echo Logging into Rancher
           ./rancher login ${{ secrets.RANCHER_URL }} --token ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
           ./rancher context switch $CLUSTER_PROJECT_ID
+          
+          echo Apply new Kubernetes configurations
           ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ../kubernetes
