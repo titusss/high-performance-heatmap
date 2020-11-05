@@ -13,9 +13,4 @@ spec:
           servicePort: 8080
         path: /
         pathType: ImplementationSpecific
-status:
-  loadBalancer:
-    ingress:
-    - ip: 131.169.234.105
-
 
