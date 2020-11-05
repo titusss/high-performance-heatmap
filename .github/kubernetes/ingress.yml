@@ -10,10 +10,8 @@ spec:
   - host: my-test-host.test.fedcloud.eu
     http:
       paths:
-      - path: /
+      - backend:
+          serviceName: ingressSerbice
+          servicePort: number: 8080
+        path: /
         pathType: ImplementationSpecific
-        backend:
-          service:
-            name: test
-            port:
-              number: 8080
