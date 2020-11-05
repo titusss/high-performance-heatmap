@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: hiri-heatmap-test
+  name: hiri-heatmap-ingress
   namespace: hiri
 spec:
   rules:
@@ -9,7 +9,7 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: hiri-heatmap-test-ingress
+          serviceName: hiri-heatmap-ingress-service
           servicePort: 8080
         path: /
         pathType: ImplementationSpecific
