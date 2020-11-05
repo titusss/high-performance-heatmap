@@ -137,7 +137,6 @@ export default {
       this.activeCamera = e.id
       this.currentViewState = Object.assign({}, this.currentViewState, e.viewState)
       this.layerSettings.gridCellLayer = Object.assign({}, this.layerSettings.gridCellLayer, e.layerSettings.gridCellLayer)
-      console.log(this.layerSettings.gridCellLayer)
       this.deck.setProps({ viewState: this.currentViewState })
       this.deck.setProps({ layers: [new GridCellLayer(this.layerSettings.gridCellLayer), new TextLayer(this.layerSettings.textLayer)] })
     },
