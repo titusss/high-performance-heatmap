@@ -9,7 +9,7 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: hiri-heatmap-ingress-service
+          serviceName: high-performance-heatmap-vue-js
           servicePort: 8080
         path: /
         pathType: ImplementationSpecific
