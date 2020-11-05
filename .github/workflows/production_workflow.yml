@@ -105,14 +105,4 @@ jobs:
           
           echo Apply new Kubernetes configurations
           ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ../.github/kubernetes
-      - name: Fedcloud DNS
-        run: |
-          echo Setting Fedcloud DNS
-          cd rancher-v2.4.6/
-          # The app name is dependent on the app name designated in the kubernetes/deployment.yml (spec -> template -> metadata -> labels -> app)
-          ./rancher kubectl -n hiri get pods
-          POD_NAME=$(./rancher kubectl -n hiri get pod -l app=high-performance-heatmap-vue-js -o jsonpath="{.items[0].metadata.name}")
-          echo POD_NAME=$POD_NAME
-          ./rancher kubectl exec -it -n hiri $POD_NAME -- sh -c 'apk add curl'
-          ./rancher kubectl exec -it -n hiri $POD_NAME -- sh -c 'curl ${{ secrets.FEDCLOUD_IPV4 }}'
           
