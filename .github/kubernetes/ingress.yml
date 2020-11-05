@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: ingress-hiri-heatmap
+  name: hiri-heatmap-test
   namespace: hiri
 spec:
   rules:
