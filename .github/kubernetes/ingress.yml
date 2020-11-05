@@ -9,7 +9,7 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: ingress-b39b2b7e1bb7c9849ac0f5c8db5d0b07
+          serviceName: hiri-heatmap-test-ingress
           servicePort: 8080
         path: /
         pathType: ImplementationSpecific
