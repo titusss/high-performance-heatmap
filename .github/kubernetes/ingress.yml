@@ -3,9 +3,6 @@ kind: Ingress
 metadata:
   name: hiri-heatmap-test
   namespace: hiri
-  resourceVersion: "113722228"
-  selfLink: /apis/extensions/v1beta1/namespaces/hiri/ingresses/hiri-heatmap-test
-  uid: 3e37fb7e-46b6-472e-a45b-aabf798d7a59
 spec:
   rules:
   - host: my-test-host.test.fedcloud.eu
