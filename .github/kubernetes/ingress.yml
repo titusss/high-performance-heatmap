@@ -1,7 +1,6 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-    manager: rancher
   name: hiri-heatmap-test
   namespace: hiri
   resourceVersion: "113722228"
