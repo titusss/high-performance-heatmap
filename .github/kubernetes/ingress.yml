@@ -5,7 +5,7 @@ metadata:
   namespace: hiri
 spec:
   rules:
-  - host: my-test-host.test.fedcloud.eu
+  - host: hiri-heatmap.test.fedcloud.eu
     http:
       paths:
       - backend:
