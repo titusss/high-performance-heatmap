@@ -3,15 +3,13 @@ kind: Ingress
 metadata:
   name: ingress-hiri-heatmap
   namespace: hiri
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - host: my-test-host.test.fedcloud.eu
     http:
       paths:
       - backend:
-          serviceName: ingressSerbice
-          servicePort: number: 8080
+          servicePort: 8080
         path: /
         pathType: ImplementationSpecific
+        
