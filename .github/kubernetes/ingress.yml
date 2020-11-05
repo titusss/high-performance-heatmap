@@ -1,15 +1,59 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
+  annotations:
+    field.cattle.io/creatorId: u-m7pf9
+    field.cattle.io/ingressState: '{"aGlyaS1oZWF0bWFwLXRlc3QvaGlyaS9teS10ZXN0LWhvc3QudGVzdC5mZWRjbG91ZC5ldS8vLzgwODA=":"deployment:hiri:high-performance-heatmap-vue-js"}'
+    field.cattle.io/publicEndpoints: '[{"addresses":["131.169.234.105"],"port":80,"protocol":"HTTP","serviceName":"hiri:ingress-b39b2b7e1bb7c9849ac0f5c8db5d0b07","ingressName":"hiri:hiri-heatmap-test","hostname":"my-test-host.test.fedcloud.eu","path":"/","allNodes":true}]'
+  creationTimestamp: "2020-11-03T18:15:58Z"
+  generation: 6
+  labels:
+    cattle.io/creator: norman
+  managedFields:
+  - apiVersion: networking.k8s.io/v1beta1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:loadBalancer:
+          f:ingress: {}
+    manager: nginx-ingress-controller
+    operation: Update
+    time: "2020-11-04T11:13:11Z"
+  - apiVersion: extensions/v1beta1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:field.cattle.io/creatorId: {}
+          f:field.cattle.io/ingressState: {}
+          f:field.cattle.io/publicEndpoints: {}
+        f:labels:
+          .: {}
+          f:cattle.io/creator: {}
+      f:spec:
+        f:rules: {}
+    manager: rancher
+    operation: Update
+    time: "2020-11-04T16:32:12Z"
   name: hiri-heatmap-test
   namespace: hiri
+  resourceVersion: "113722228"
+  selfLink: /apis/extensions/v1beta1/namespaces/hiri/ingresses/hiri-heatmap-test
+  uid: 3e37fb7e-46b6-472e-a45b-aabf798d7a59
 spec:
   rules:
   - host: my-test-host.test.fedcloud.eu
     http:
       paths:
       - backend:
+          serviceName: ingress-b39b2b7e1bb7c9849ac0f5c8db5d0b07
           servicePort: 8080
         path: /
         pathType: ImplementationSpecific
-        
+status:
+  loadBalancer:
+    ingress:
+    - ip: 131.169.234.105
+
+
