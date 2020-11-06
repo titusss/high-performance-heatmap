@@ -91,26 +91,15 @@
 </template>
 
 <script>
-import settingsTemplate from '@/assets/settingsTemplate.json'
 export default {
   props: {
-    globalSettings: Object
-  },
-  data () {
-    return {
-      settingsTemplate,
-      settings: null
-    }
+    settings: Object,
+    settingsTemplate: Object
   },
   watch: {
-    globalSettings: {
-      handler: function () {
-        this.settings = this.globalSettings
-      },
-      deep: true
-    },
     'settings.layer': {
       handler: function () {
+        console.log('this.settings settingsMenu emit change: ', this.settings)
         this.$emit('settingsChanged', { type: 'layer', settings: this.settings.layer })
       },
       deep: true
@@ -128,33 +117,8 @@ export default {
       deep: true
     }
   },
-  methods: {
-    generateSettings () {
-      var settings = {
-        layer: {},
-        material: {},
-        lighting: {},
-        custom: {}
-      }
-      for (var mode in settingsTemplate) {
-        for (var i = 0; i < settingsTemplate[mode].settings.length; i++) {
-          for (
-            var j = 0;
-            j < settingsTemplate[mode].settings[i].inputs.length;
-            j++
-          ) {
-            var input = settingsTemplate[mode].settings[i].inputs[j]
-            settings[input.propertyType][input.id] = input.value
-          }
-        }
-      }
-      return settings
-    }
-  },
   created () {
-    this.settings = this.generateSettings()
-  },
-  mounted () {
+    console.log('this.settings settingsMenu created: ', this.settings)
     this.$emit('settingsChanged', { type: 'layer', settings: this.settings.layer })
   }
 }

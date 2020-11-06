@@ -12,7 +12,7 @@
             "label": "Gap",
             "type": "range",
             "min": 0,
-            "max": 800,
+            "max": 2000,
             "step": 1,
             "labelCols": 5,
             "value": 760,
@@ -27,11 +27,12 @@
             "step": 5,
             "labelCols": 5,
             "value": 200,
-            "propertyType": "layer"
+            "propertyType": "layer",
+            "valueDependencyId": "extruded"
           },
           {
             "id": "extruded",
-            "label": "Extruded",
+            "label": "3D Extrusion",
             "type": "checkbox",
             "labelCols": 6,
             "value": true,
