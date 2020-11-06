@@ -8,7 +8,8 @@
       v-if="layerSettings.gridCellLayer.data"
       class="settings_menu menu_c"
       @settingsChanged="updateSettings"
-      :globalSettings="layerSettings.gridCellLayer"
+      :settings="settings"
+      :settingsTemplate="settingsTemplate"
     />
   </div>
 </template>
@@ -25,6 +26,7 @@ import axios from 'axios'
 import settingsMenu from '@/components/settingsMenu.vue'
 import cameraMenu from '@/components/cameraMenu.vue'
 import chroma from 'chroma-js'
+import settingsTemplate from '@/assets/settingsTemplate.json'
 export default {
   components: {
     settingsMenu,
@@ -75,6 +77,8 @@ export default {
         pitch: 40,
         bearing: -40
       },
+      settingsTemplate,
+      settings: null,
       colorSchemes: {
         sequential: [
           'BuGn',
@@ -118,6 +122,7 @@ export default {
   created () {
     this.fetchData(`${this.backendUrl}/config`)
     this.deck = null
+    this.settings = this.generateSettings()
   },
   mounted () {
     this.deck = new Deck({
@@ -133,18 +138,44 @@ export default {
     // this.deck.layerManager.layers[0].props.elevationScale = 10
   },
   methods: {
+    generateSettings () {
+      var settings = {
+        layer: {},
+        material: {},
+        lighting: {},
+        custom: {}
+      }
+      for (var mode in settingsTemplate) {
+        for (var i = 0; i < settingsTemplate[mode].settings.length; i++) {
+          for (
+            var j = 0;
+            j < settingsTemplate[mode].settings[i].inputs.length;
+            j++
+          ) {
+            var input = settingsTemplate[mode].settings[i].inputs[j]
+            settings[input.propertyType][input.id] = input.value
+          }
+        }
+      }
+      return settings
+    },
     changeCamera (e) {
       this.activeCamera = e.id
       this.currentViewState = Object.assign({}, this.currentViewState, e.viewState)
+<<<<<<< HEAD
       this.layerSettings.gridCellLayer = Object.assign({}, this.layerSettings.gridCellLayer, e.layerSettings.gridCellLayer)
+=======
+>>>>>>> Synchronized view state updates with settings.
       this.deck.setProps({ viewState: this.currentViewState })
-      this.deck.setProps({ layers: [new GridCellLayer(this.layerSettings.gridCellLayer), new TextLayer(this.layerSettings.textLayer)] })
+      this.layerSettings.gridCellLayer = Object.assign({}, this.layerSettings.gridCellLayer, e.layerSettings.gridCellLayer)
+      // this.deck.setProps({ layers: [new GridCellLayer(this.layerSettings.gridCellLayer), new TextLayer(this.layerSettings.textLayer)] })
+      this.settings.layer = Object.assign({}, this.settings.layer, e.layerSettings.gridCellLayer)
     },
     updateSettings (updatedSettings) {
       const s = updatedSettings.settings
       // It might be useful to use a switch case instead, if the possible conditions grow beyond 5 items.
       if (updatedSettings.type === 'layer') {
-        this.layerSettings.gridCellLayer = Object.assign(s, this.layerSettings.gridCellLayer)
+        this.layerSettings.gridCellLayer = Object.assign({}, this.layerSettings.gridCellLayer, s)
         if (this.colorGradientPreset !== s.gradientPreset.value) {
           this.colorGradientPreset = s.gradientPreset.value
           this.colorGradient = chroma

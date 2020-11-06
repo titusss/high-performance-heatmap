@@ -10,7 +10,6 @@
 // @ is an alias to /src
 import DeckGL from '@/components/DeckGL.vue'
 import loadingOverlay from '@/components/loadingOverlay.vue'
-
 export default {
   components: {
     DeckGL,
