@@ -299,6 +299,7 @@ export default {
         ${column}<br>
         ${row}<br>
         <strong>${count}</strong>`
+        // Below is an example for custom CSS styling for the tooltip.
         // style: {
         //   backgroundColor: '#000',
         //   margin: '0'

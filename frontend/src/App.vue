@@ -1,18 +1,18 @@
 <template>
   <div id="app">
     <loadingOverlay v-if="this.longLoading"/>
-    <deckgl @longLoadingFinished="longLoading = false"/>
+    <deckglCanvas @longLoadingFinished="longLoading = false"/>
     <router-view/>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import deckgl from '@/components/deckgl.vue'
+import deckglCanvas from '@/components/deckglCanvas.vue'
 import loadingOverlay from '@/components/loadingOverlay.vue'
 export default {
   components: {
-    deckgl,
+    deckglCanvas,
     loadingOverlay
   },
   data () {
