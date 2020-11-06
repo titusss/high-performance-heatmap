@@ -1,4 +1,4 @@
-name: Docker
+name: Build & Deploy Backend
 
 on:
   push: # Triggers on any push to master branch
