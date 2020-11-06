@@ -162,10 +162,6 @@ export default {
     changeCamera (e) {
       this.activeCamera = e.id
       this.currentViewState = Object.assign({}, this.currentViewState, e.viewState)
-<<<<<<< HEAD
-      this.layerSettings.gridCellLayer = Object.assign({}, this.layerSettings.gridCellLayer, e.layerSettings.gridCellLayer)
-=======
->>>>>>> Synchronized view state updates with settings.
       this.deck.setProps({ viewState: this.currentViewState })
       this.layerSettings.gridCellLayer = Object.assign({}, this.layerSettings.gridCellLayer, e.layerSettings.gridCellLayer)
       // this.deck.setProps({ layers: [new GridCellLayer(this.layerSettings.gridCellLayer), new TextLayer(this.layerSettings.textLayer)] })
