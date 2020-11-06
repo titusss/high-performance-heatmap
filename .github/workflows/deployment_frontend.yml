@@ -56,12 +56,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run tests
         run: |
-          echo IMAGE_NAME=$IMAGE_NAME
+          cd $SYSTEM_CONTEXT
           if [ -f docker-compose.test.yml ]; then
             docker-compose --file docker-compose.test.yml build
             docker-compose --file docker-compose.test.yml run sut
           else
-            docker build . --file $SYSTEM_CONTEXT/Dockerfile
+            docker build . --file Dockerfile
           fi
       
   # Push image to GitHub Packages.
@@ -77,7 +77,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build image
-        run:  docker build . --file $SYSTEM_CONTEXT/Dockerfile --tag $IMAGE_NAME
+        run:  |
+          cd $SYSTEM_CONTEXT
+          docker build . --file Dockerfile --tag $IMAGE_NAME
 
       - name: Log into GitHub Container Registry
       # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
