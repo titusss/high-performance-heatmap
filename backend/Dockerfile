@@ -6,6 +6,7 @@ COPY . ./
 
 # COPY . /app
 # WORKDIR /app
+# Placeholder
 
 RUN pip install -r requirements.txt
 RUN pip install gunicorn
