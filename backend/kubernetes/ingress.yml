@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hiri-heatmap-flask-server-ingress
+  namespace: hiri
+spec:
+  rules:
+  - host: hiri-heatmap-backend.test.fedcloud.eu
+    http:
+      paths:
+      - backend:
+          serviceName: high-performance-heatmap-flask-server
+          servicePort: 5000
+        path: /
+        pathType: ImplementationSpecific
+

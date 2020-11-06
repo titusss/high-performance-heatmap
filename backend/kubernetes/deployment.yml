@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: high-performance-heatmap-flask-server
+  labels:
+    app: high-performance-heatmap-flask-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: high-performance-heatmap-flask-server
+  template:
+    metadata:
+      labels:
+        app: high-performance-heatmap-flask-server
+    spec:
+      containers:
+      - name: high-performance-heatmap-flask-server
+        image: {{image_name_placeholder}}
+        ports:
+        - containerPort: 5000
+      imagePullSecrets:
+      - name: githubdockerregistry
