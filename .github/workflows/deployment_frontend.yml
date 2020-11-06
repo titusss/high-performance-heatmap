@@ -1,7 +1,7 @@
 name: Docker
 
 on:
-  push:
+  push: # Triggers on any push to master branch
     # Publish `master` as Docker `latest` image.
     branches:
       - master
@@ -10,30 +10,58 @@ on:
     tags:
       - v*
 
+  workflow_dispatch: # Allows for manual trigger in github GUI (via "Run workflow" button)
+    branches:
+      - master
+    tags:
+      - v*
+        
   # Run tests for any PRs.
   pull_request:
 
 env:
+  # TODO: Set this to backend or frontend.
+  SYSTEM_CONTEXT: frontend
   # TODO: Change variable to your image's name.
-  IMAGE_NAME: high-performance-heatmap
+  IMAGE_NAME: high-performance-heatmap-$SYSTEM_CONTEXT
+  #TODO: Set the namespace for your Kubernetes/Rancher Cluster
+  CLUSTER_NAMESPACE: hiri
+  #TODO: Set the Kubernetes/Rancher cluster_id:project_id
+  CLUSTER_PROJECT_ID: c-kmghz:p-fj98k
 
 jobs:
-    
+  
+  # This job determines if the backend or frontend changed and only triggers the according jobs
+  changes:
+    runs-on: ubuntu-latest
+    # Set job outputs to values from filter step
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2 # GitHub Filtering Action from 'dorny'. This is a dependency and might brake eventually
+      id: filter
+      with:
+        filters: |
+          frontend:
+            - 'frontend/**'
+          
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
   test:
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-
       - name: Run tests
         run: |
+          echo IMAGE_NAME=$IMAGE_NAME
           if [ -f docker-compose.test.yml ]; then
             docker-compose --file docker-compose.test.yml build
             docker-compose --file docker-compose.test.yml run sut
           else
-            docker build . --file Dockerfile
+            docker build . --file /Dockerfile
           fi
       
   # Push image to GitHub Packages.
@@ -49,7 +77,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build image
-        run:  docker build . --file Dockerfile --tag $IMAGE_NAME
+        run:  docker build . --file $SYSTEM_CONTEXT/Dockerfile --tag $IMAGE_NAME
 
       - name: Log into GitHub Container Registry
       # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
@@ -85,14 +113,11 @@ jobs:
           docker push $IMAGE_ID:$GITHUB_SHA
           
           echo Replace placeholder image name with image path id
-          cd .github/kubernetes
+          cd $SYSTEM_CONTEXT/kubernetes
           sed -i "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" deployment.yml
 
       - name: Rancher
         run: |
-          CLUSTER_PROJECT_ID=c-kmghz:p-fj98k
-          RANCHER_NAMESPACE=hiri
-          
           echo Download Rancher
           # Download Rancher binary from official rancher website
           wget https://releases.rancher.com/cli2/v2.4.6/rancher-linux-amd64-v2.4.6.tar.gz
@@ -104,5 +129,5 @@ jobs:
           ./rancher context switch $CLUSTER_PROJECT_ID
           
           echo Apply new Kubernetes configurations
-          ./rancher kubectl -n $RANCHER_NAMESPACE apply -f ../.github/kubernetes
+          ./rancher kubectl -n $CLUSTER_NAMESPACE apply -f ../$SYSTEM_CONTEXT/kubernetes
           
