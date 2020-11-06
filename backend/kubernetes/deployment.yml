@@ -15,11 +15,11 @@ spec:
         app: high-performance-heatmap-flask-server
     spec:
       containers:
-      - env:
-        - name: MONGO_CONNECTION_STRING
-          value: {{mongo_connection_placeholder}}
       - name: high-performance-heatmap-flask-server
         image: {{image_name_placeholder}}
+        env:
+        - name: MONGO_CONNECTION_STRING
+          value: {{mongo_connection_placeholder}}
         ports:
         - containerPort: 80
       imagePullSecrets:
