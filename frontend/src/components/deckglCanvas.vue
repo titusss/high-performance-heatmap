@@ -35,7 +35,8 @@ export default {
   data () {
     return {
       // backendUrl: 'http://127.0.0.1:5000',
-      backendUrl: 'https://hp-heatmap-backend-44nub6ij6q-ez.a.run.app',
+      // backendUrl: 'https://hp-heatmap-backend-44nub6ij6q-ez.a.run.app',
+      backendUrl: 'http://hiri-heatmap-backend.test.fedcloud.eu',
       activeCamera: '3D',
       constants: {
         textMarginRight: -0.003,
