@@ -1,0 +1,135 @@
+name: Docker
+
+on:
+  push: # Triggers on any push to master branch
+    # Publish `master` as Docker `latest` image.
+    branches:
+      - master
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+  workflow_dispatch: # Allows for manual trigger in github GUI (via "Run workflow" button)
+    branches:
+      - master
+    tags:
+      - v*
+        
+  # Run tests for any PRs.
+  pull_request:
+
+env:
+  # TODO: Set this to backend or backend.
+  SYSTEM_CONTEXT: backend
+  # TODO: Change variable to your image's name.
+  IMAGE_NAME: high-performance-heatmap-backend
+  #TODO: Set the namespace for your Kubernetes/Rancher Cluster
+  CLUSTER_NAMESPACE: hiri
+  #TODO: Set the Kubernetes/Rancher cluster_id:project_id
+  CLUSTER_PROJECT_ID: c-kmghz:p-fj98k
+
+jobs:
+  
+  # This job determines if the backend or backend changed and only triggers the according jobs
+  changes:
+    runs-on: ubuntu-latest
+    # Set job outputs to values from filter step
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2 # GitHub Filtering Action from 'dorny'. This is a dependency and might brake eventually
+      id: filter
+      with:
+        filters: |
+          backend:
+            - 'backend/**'
+          
+  # Run tests.
+  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
+  test:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+          cd $SYSTEM_CONTEXT
+          if [ -f docker-compose.test.yml ]; then
+            docker-compose --file docker-compose.test.yml build
+            docker-compose --file docker-compose.test.yml run sut
+          else
+            docker build . --file Dockerfile
+          fi
+      
+  # Push image to GitHub Packages.
+  # See also https://docs.docker.com/docker-hub/builds/
+  push:
+    # Ensure test job passes before pushing image.
+    needs: test
+
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run:  |
+          cd $SYSTEM_CONTEXT
+          docker build . --file Dockerfile --tag $IMAGE_NAME
+
+      - name: Log into GitHub Container Registry
+      # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
+        run: echo "${{ secrets.CR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image to GitHub Container Registry
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+          
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          echo GITHUB_SHA=$GITHUB_SHA
+          echo IMAGE_ID:GITHUB_SHA=$IMAGE_ID:$GITHUB_SHA
+          
+          # Use latest naming convention (Alternative)
+          # docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          # docker push $IMAGE_ID:$VERSION
+          
+          # Use commit SHA as version tag (Renders $VERSION unnecessary)
+          docker tag $IMAGE_NAME $IMAGE_ID:$GITHUB_SHA
+          docker push $IMAGE_ID:$GITHUB_SHA
+          
+          echo Replace placeholder image name with image path id
+          cd $SYSTEM_CONTEXT/kubernetes
+          sed -i "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" deployment.yml
+
+      - name: Rancher
+        run: |
+          echo Download Rancher
+          # Download Rancher binary from official rancher website
+          wget https://releases.rancher.com/cli2/v2.4.6/rancher-linux-amd64-v2.4.6.tar.gz
+          tar -xvzf rancher-linux-amd64-v2.4.6.tar.gz
+          cd rancher-v2.4.6/
+          
+          echo Logging into Rancher
+          ./rancher login ${{ secrets.RANCHER_URL }} --token ${{ secrets.RANCHER_KUBERNETES_TOKEN }}
+          ./rancher context switch $CLUSTER_PROJECT_ID
+          
+          echo Apply new Kubernetes configurations
+          ./rancher kubectl -n $CLUSTER_NAMESPACE apply -f ../$SYSTEM_CONTEXT/kubernetes
+          
