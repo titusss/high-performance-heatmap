@@ -1,4 +1,4 @@
-name: Build & Deploy Frontend
+name: Build & Deploy Backend
 
 on:
   push: # Triggers on any push to master branch
@@ -20,10 +20,10 @@ on:
   pull_request:
 
 env:
-  # TODO: Set this to backend or frontend.
-  SYSTEM_CONTEXT: frontend
+  # TODO: Set this to backend or backend.
+  SYSTEM_CONTEXT: backend
   # TODO: Change variable to your image's name.
-  IMAGE_NAME: high-performance-heatmap-frontend
+  IMAGE_NAME: high-performance-heatmap-backend
   #TODO: Set the namespace for your Kubernetes/Rancher Cluster
   CLUSTER_NAMESPACE: hiri
   #TODO: Set the Kubernetes/Rancher cluster_id:project_id
@@ -31,26 +31,26 @@ env:
 
 jobs:
   
-  # This job determines if the backend or frontend changed and only triggers the according jobs
+  # This job determines if the backend or backend changed and only triggers the according jobs
   changes:
     runs-on: ubuntu-latest
     # Set job outputs to values from filter step
     outputs:
-      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
     steps:
     - uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2 # GitHub Filtering Action from 'dorny'. This is a dependency and might brake eventually
       id: filter
       with:
         filters: |
-          frontend:
-            - 'frontend/**'
+          backend:
+            - 'backend/**'
           
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
   test:
     needs: changes
-    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
