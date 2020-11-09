@@ -1,5 +1,5 @@
 <template>
-  <div class="menu" v-if="settings">
+  <div class="menu" v-if="settingsTemplate">
     <div
       v-for="settingsMode in settingsTemplate"
       :key="settingsMode.id"
@@ -43,7 +43,7 @@
           >
             <b-form-input
               v-if="input.type === 'range' || input.type === 'dropdown'"
-              v-model="settings[input.propertyType][input.id]"
+              v-model="localSettings[input.propertyType][input.id]"
               :type="input.type"
               :step="input.step"
               :min="input.min"
@@ -51,18 +51,18 @@
               :id="input.id"
               :disabled="
                 input.valueDependencyId
-                  ? !settings[input.propertyType][input.valueDependencyId]
+                  ? !localSettings[input.propertyType][input.valueDependencyId]
                   : false
               "
             ></b-form-input>
             <b-form-checkbox
               v-else-if="input.type === 'checkbox'"
-              v-model="settings[input.propertyType][input.id]"
+              v-model="localSettings[input.propertyType][input.id]"
               :type="input.type"
               :id="input.id"
               :disabled="
                 input.valueDependencyId
-                  ? !settings[input.propertyType][input.valueDependencyId]
+                  ? !localSettings[input.propertyType][input.valueDependencyId]
                   : false
               "
             ></b-form-checkbox>
@@ -70,18 +70,23 @@
               class="dropdown-gradient"
               variant="link"
               size="sm"
-              v-model="settings[input.propertyType][input.id]"
+              v-model="localSettings[input.propertyType][input.id]"
               v-else-if="input.type === 'dropdownGradient'"
               :id="input.id"
               :disabled="
                 input.valueDependencyId
-                  ? !settings[input.propertyType][input.valueDependencyId]
+                  ? !localSettings[input.propertyType][input.valueDependencyId]
                   : false
               "
               ><template v-slot:button-content>
-                {{ settings[input.propertyType][input.id].label }}
+                {{ localSettings[input.propertyType][input.id].label }}
               </template>
-              <b-dropdown-item-button v-for="gradient in input.options" :key="gradient.label" @click="settings[input.propertyType][input.id] = gradient">{{gradient.label}}</b-dropdown-item-button>
+              <b-dropdown-item-button
+                v-for="gradient in input.options"
+                :key="gradient.label"
+                @click="localSettings[input.propertyType][input.id] = gradient">
+                {{gradient.label}}
+              </b-dropdown-item-button>
             </b-dropdown>
           </b-form-group>
         </b-form-group>
@@ -94,34 +99,37 @@
 export default {
   props: {
     settings: Object,
-    settingsTemplate: Object
+    settingsTemplate: Object,
   },
   watch: {
     'settings.layer': {
-      handler: function () {
-        console.log('this.settings settingsMenu emit change: ', this.settings)
-        this.$emit('settingsChanged', { type: 'layer', settings: this.settings.layer })
+      handler() {
+        this.$emit('settings-changed', { type: 'layer', settings: this.localSettings.layer });
       },
-      deep: true
+      deep: true,
     },
-    'settings.material': {
-      handler: function () {
-        this.$emit('settingsChanged', { type: 'material', settings: this.settings.material })
+    'localSettings.material': {
+      handler() {
+        this.$emit('settings-changed', { type: 'material', settings: this.localSettings.material });
       },
-      deep: true
+      deep: true,
     },
-    'settings.lighting': {
-      handler: function () {
-        this.$emit('settingsChanged', { type: 'lighting', settings: this.settings.lighting })
+    'localSettings.lighting': {
+      handler() {
+        this.$emit('settings-changed', { type: 'lighting', settings: this.localSettings.lighting });
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
-  created () {
-    console.log('this.settings settingsMenu created: ', this.settings)
-    this.$emit('settingsChanged', { type: 'layer', settings: this.settings.layer })
-  }
-}
+  data() {
+    return {
+      localSettings: this.settings,
+    };
+  },
+  created() {
+    this.$emit('settings-changed', { type: 'layer', settings: this.localSettings.layer });
+  },
+};
 </script>
 
 <style>

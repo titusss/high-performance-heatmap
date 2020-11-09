@@ -1,74 +1,85 @@
 <template>
   <div class="main_parent">
     <div class="buttons_background">
-      <div @click="$emit('active-camera-selected', option)" class="option_button" :class="{ option_button_active: activeCamera === option.id }" v-for="option in cameraOptions" :key="option.id">
+      <div
+        @click="$emit('active-camera-selected', option)"
+        class="option_button"
+        :class="{ option_button_active: activeCamera === option.id }"
+        v-for="option in cameraOptions"
+        :key="option.id"
+      >
         <img class="option_icon" :src="require(`@/assets/${option.id}.svg`)" />
       </div>
-      </div>
-      <label :class="{ label_active: activeCamera === option.id }" v-for="option in cameraOptions" :key="option.id">{{ option.id }}</label>
     </div>
+    <label
+      :class="{ label_active: activeCamera === option.id }"
+      v-for="option in cameraOptions"
+      :key="option.id"
+      >{{ option.id }}</label
+    >
+  </div>
 </template>
 
 <script>
 export default {
   props: {
-    activeCamera: String
+    activeCamera: String,
   },
-  data () {
+  data() {
     return {
       cameraOptions: [
         {
           id: '3D',
           viewState: {
             pitch: 40,
-            bearing: -40
+            bearing: -40,
           },
           layerSettings: {
             gridCellLayer: {
-              extruded: true
-            }
-          }
+              extruded: true,
+            },
+          },
         },
         {
           id: 'Top',
           viewState: {
             pitch: 0,
-            bearing: -90
+            bearing: -90,
           },
           layerSettings: {
             gridCellLayer: {
-              extruded: false
-            }
-          }
+              extruded: false,
+            },
+          },
         },
         {
           id: 'Side',
           viewState: {
             pitch: 90,
-            bearing: 0
+            bearing: 0,
           },
           layerSettings: {
             gridCellLayer: {
-              extruded: true
-            }
-          }
+              extruded: true,
+            },
+          },
         },
         {
           id: 'Front',
           viewState: {
             pitch: 90,
-            bearing: 90
+            bearing: 90,
           },
           layerSettings: {
             gridCellLayer: {
-              extruded: true
-            }
-          }
-        }
-      ]
-    }
-  }
-}
+              extruded: true,
+            },
+          },
+        },
+      ],
+    };
+  },
+};
 </script>
 
 <style scoped>
@@ -102,14 +113,14 @@ label {
   font-weight: 600;
 }
 .option_button_active {
-  background-color: #1C1C29 !important;
+  background-color: #1c1c29 !important;
   filter: saturate(0) brightness(1.5);
   border-radius: 5px;
 }
-.option_button>img {
-  transition: transform 350ms cubic-bezier(.36,1.59,.66,1);
+.option_button > img {
+  transition: transform 350ms cubic-bezier(0.36, 1.59, 0.66, 1);
 }
-.option_button:hover>img {
-  transform: scale(1.3)
+.option_button:hover > img {
+  transform: scale(1.3);
 }
 </style>
