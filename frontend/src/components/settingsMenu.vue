@@ -1,3 +1,4 @@
+<!-- App / deckglCanvas / mainMenu / settingsMenu -->
 <template>
   <div class="menu" v-if="settingsTemplate">
     <div
@@ -8,7 +9,7 @@
       <b-button
         v-if="settingsMode.id !== 'generalSettings'"
         variant="link"
-        class="settings_mode"
+        class="header"
         v-b-toggle="settingsMode.id"
         size="sm"
         ><b-icon
@@ -138,9 +139,7 @@ export default {
   width: 369px;
   padding: 20px 40px 10px 40px;
   box-shadow: 10px 30px 60px rgba(0, 0, 0, 0.05);
-  border-radius: 25px;
-  font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  border-radius: 5px;
   font-size: 14px;
 }
 legend {
@@ -161,7 +160,7 @@ label {
 .input_group_custom {
   margin-bottom: 0px !important;
 }
-.settings_mode {
+.header {
   color: #2c3e50 !important;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -169,7 +168,7 @@ label {
   text-decoration: none !important;
   font-size: 12px !important;
 }
-.settings_mode:hover {
+.header:hover {
   color: #308ae4 !important;
 }
 .no_rotation {

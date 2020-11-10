@@ -1,3 +1,4 @@
+<!-- App / deckglCanvas / cameraMenu -->
 <template>
   <div class="main_parent">
     <div class="buttons_background">
@@ -94,7 +95,7 @@ export default {
 .main_parent {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, aut0);
+  grid-template-rows: repeat(2, auto);
   grid-row-gap: 10px;
 }
 label {
@@ -114,8 +115,10 @@ label {
 }
 .option_button_active {
   background-color: #1c1c29 !important;
-  filter: saturate(0) brightness(1.5);
   border-radius: 5px;
+}
+.option_button_active>img {
+  filter: saturate(0) brightness(1.8);
 }
 .option_button > img {
   transition: transform 350ms cubic-bezier(0.36, 1.59, 0.66, 1);

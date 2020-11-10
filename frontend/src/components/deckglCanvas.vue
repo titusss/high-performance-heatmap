@@ -1,5 +1,16 @@
+<!-- App / deckglCanvas -->
 <template>
   <div>
+    <div id="export_svg"></div>
+    <mainMenu
+      v-if="layerSettings.gridCellLayer.data"
+      class="main_menu menu_c"
+      @settings-changed="updateSettings"
+      :settings="settings"
+      :settingsTemplate="settingsTemplate"
+      :layerSettings="layerSettings.gridCellLayer"
+      :colorGradient="colorGradient"
+    />
     <cameraMenu
       class="camera_menu menu_c"
       :activeCamera="activeCamera"
@@ -8,13 +19,6 @@
     <div class="deck-container">
       <canvas id="deck-canvas" ref="canvas"></canvas>
     </div>
-    <settingsMenu
-      v-if="layerSettings.gridCellLayer.data"
-      class="settings_menu menu_c"
-      @settings-changed="updateSettings"
-      :settings="settings"
-      :settingsTemplate="settingsTemplate"
-    />
   </div>
 </template>
 
@@ -28,14 +32,14 @@ import {
 import { GridCellLayer, TextLayer } from '@deck.gl/layers';
 import axios from 'axios';
 import chroma from 'chroma-js';
-import settingsMenu from './settingsMenu.vue';
 import cameraMenu from './cameraMenu.vue';
+import mainMenu from './mainMenu.vue';
 import settingsTemplate from '../assets/settingsTemplate.json';
 
 export default {
   components: {
-    settingsMenu,
     cameraMenu,
+    mainMenu,
   },
   data() {
     return {
@@ -361,16 +365,21 @@ export default {
   top: 0;
   left: 0;
 }
-.settings_menu {
-  top: 10px;
-  left: 10px;
-}
+
 .camera_menu {
   top: 10px;
   right: 10px;
 }
+
+.main_menu {
+  top: 10px;
+  left: 10px;
+}
 .menu_c {
   position: absolute;
   z-index: 1000;
+}
+#export_svg {
+  display: none;
 }
 </style>
