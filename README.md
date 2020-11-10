@@ -1,3 +1,5 @@
+![2](https://user-images.githubusercontent.com/26855197/98729845-c790f100-239b-11eb-8093-ac387629b8b3.gif)
+
 # deck-gl-vue
 
 ## Project setup
