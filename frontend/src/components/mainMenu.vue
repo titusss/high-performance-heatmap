@@ -27,6 +27,7 @@
         v-else-if="option.id === 'exportImage'"
         :layerSettings="layerSettings"
         :colorGradient="colorGradient"
+        @take-screenshot="$emit('take-screenshot')"
       />
     </b-collapse>
   </div>

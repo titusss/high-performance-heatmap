@@ -1,5 +1,6 @@
 <template>
   <div class="menu">
+    <a id="canvas-png-link"></a>
     <div class="mb-4">
       <div class="header mt-3 mb-2">Download Top View as SVG</div>
       <!-- <label>Export the 2D top view of the heatmap.</label> -->
@@ -8,7 +9,7 @@
         <b-icon icon="download" aria-hidden="true"></b-icon> SVG Heatmap
       </b-button>
       <div class="header mt-3 mb-2">Download Current View as PNG</div>
-      <b-button block variant="dark" size="sm">
+      <b-button id="btn-download" block variant="dark" size="sm" @click="$emit('take-screenshot')">
         <!-- <img :src="require(`@/assets/exportImage.svg`)"> Download SVG -->
         <b-icon icon="download" aria-hidden="true"></b-icon> PNG Current View
       </b-button>
@@ -24,17 +25,14 @@ export default {
   },
   methods: {
     exportCanvasSvg() {
+      // This needs to be slimmed down.
       const domElement = document.getElementById('export_svg');
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       const svgNS = svg.namespaceURI;
       svg.setAttribute('id', 'downloadble_svg');
       svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
       const size = this.layerSettings.cellSize / 50;
-      for (
-        let i = 0;
-        i < this.layerSettings.data.length;
-        i += 1
-      ) {
+      for (let i = 0; i < this.layerSettings.data.length; i += 1) {
         const rect = document.createElementNS(svgNS, 'rect');
         rect.setAttribute(
           'x',
@@ -48,25 +46,21 @@ export default {
         rect.setAttribute('height', size);
         rect.setAttribute(
           'fill',
-          this.colorGradient(
-            this.layerSettings.data[i].VALUE,
-          ).hex(),
+          this.colorGradient(this.layerSettings.data[i].VALUE).hex(),
         );
         svg.appendChild(rect);
       }
       svg.setAttribute(
         'width',
-        this.layerSettings.data[
-          this.layerSettings.data.length - 1
-        ].COORDINATES[1]
+        this.layerSettings.data[this.layerSettings.data.length - 1]
+          .COORDINATES[1]
           * 2220
           + this.layerSettings.cellSize / 50,
       );
       svg.setAttribute(
         'height',
-        this.layerSettings.data[
-          this.layerSettings.data.length - 1
-        ].COORDINATES[0]
+        this.layerSettings.data[this.layerSettings.data.length - 1]
+          .COORDINATES[0]
           * 2220
           + this.layerSettings.cellSize / 50,
       );

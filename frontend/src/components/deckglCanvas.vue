@@ -6,6 +6,7 @@
       v-if="layerSettings.gridCellLayer.data"
       class="main_menu menu_c"
       @settings-changed="updateSettings"
+      @take-screenshot="takeScreenshot"
       :settings="settings"
       :settingsTemplate="settingsTemplate"
       :layerSettings="layerSettings.gridCellLayer"
@@ -16,7 +17,7 @@
       :activeCamera="activeCamera"
       @active-camera-selected="changeCamera"
     />
-    <div class="deck-container">
+    <div class="deck-container" id="deck-container">
       <canvas id="deck-canvas" ref="canvas"></canvas>
     </div>
   </div>
@@ -149,6 +150,16 @@ export default {
     // this.deck.layerManager.layers[0].props.elevationScale = 10
   },
   methods: {
+    takeScreenshot() {
+      this.deck.redraw(true);
+      const { canvas } = this.deck;
+      document.getElementById('deck-container').appendChild(canvas);
+      const a = document.createElement('a');
+      // toDataURL defaults to png, so we need to request a jpeg, then convert for file download.
+      a.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+      a.download = 'screenshot.png';
+      a.click();
+    },
     generateSettings() {
       const settings = {
         layer: {},
@@ -184,6 +195,7 @@ export default {
         ...this.settings.layer,
         ...e.layerSettings.gridCellLayer,
       };
+      console.log(this.deck);
     },
     updateSettings(updatedSettings) {
       const s = updatedSettings.settings;
