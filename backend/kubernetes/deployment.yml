@@ -21,6 +21,6 @@ spec:
         - containerPort: 80
         env:
         - name: MONGO_CONNECTION_STRING
-          value: {{mongo_connection_placeholder}}
+          value: mongo_connection_placeholder
       imagePullSecrets:
       - name: githubdockerregistry
