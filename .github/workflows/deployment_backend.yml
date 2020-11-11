@@ -117,10 +117,12 @@ jobs:
           
           echo Replace placeholder image name with image path id
           cd $SYSTEM_CONTEXT/kubernetes
-          sed -i 's|mongo_connection_placeholder|'${{secrets.MONGO_CONNECTION_STRING}}'|g' deployment.yml
+          sed -i 's|mongo_connection_placeholder|"$ENV{TOKEN}"|g' deployment.yml
           sed -i "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" deployment.yml
           cat deployment.yml
-
+        env:
+          TOKEN: ${{secrets.MONGO_CONNECTION_STRING}}
+          
       - name: Rancher
         run: |
           echo Download Rancher
@@ -135,4 +137,3 @@ jobs:
           
           echo Apply new Kubernetes configurations
           ./rancher kubectl -n $CLUSTER_NAMESPACE apply -f ../$SYSTEM_CONTEXT/kubernetes
-          
