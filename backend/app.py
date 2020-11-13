@@ -6,7 +6,7 @@ from bson.json_util import loads, dumps, ObjectId
 import pandas as pd
 from io import BytesIO
 
-client = MongoClient(os.environ.get("MONGO_CONNECTION_STRING"))
+client = MongoClient(os.environ.get("mongoConnectionString"))
 # client = MongoClient() # For offline testing.
 db = client.test
 visualizations = db.visualizations
