@@ -20,7 +20,7 @@ spec:
         ports:
         - containerPort: 80
         env:
-        - name: mongoConnectionString
+        - name: testend
           value: mongo_connection_placeholder
       imagePullSecrets:
       - name: githubdockerregistry
