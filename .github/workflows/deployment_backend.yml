@@ -118,11 +118,13 @@ jobs:
           echo Replace placeholder image name with image path id
           cd $SYSTEM_CONTEXT/kubernetes
           echo $TOKEN
+          echo ${{ secrets.MONGO_CONNECTION_STRING }}
+          echo $ENV{TOKEN}
           perl -pi -e 's|mongo_connection_placeholder|"$ENV{TOKEN}"|' deployment.yml
           sed -i "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" deployment.yml
           cat deployment.yml
         env:
-          TOKEN: ${{secrets.MONGO_CONNECTION_STRING}}
+          TOKEN: ${{ secrets.MONGO_CONNECTION_STRING }}
           
       - name: Rancher
         run: |
