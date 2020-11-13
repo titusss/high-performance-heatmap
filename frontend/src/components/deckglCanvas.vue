@@ -7,6 +7,7 @@
       class="main_menu menu_c"
       @settings-changed="updateSettings"
       @take-screenshot="takeScreenshot"
+      @active-camera-selected="changeCamera"
       :settings="settings"
       :settingsTemplate="settingsTemplate"
       :layerSettings="layerSettings.gridCellLayer"
@@ -87,48 +88,11 @@ export default {
         zoom: 11,
         minZoom: 2,
         pitch: 40,
+        maxPitch: 89,
         bearing: -40,
       },
       settingsTemplate,
       settings: null,
-      colorSchemes: {
-        sequential: [
-          'BuGn',
-          'BuPu',
-          'GnBu',
-          'OrRd',
-          'PuBu',
-          'PuBuGn',
-          'PuRd',
-          'RdPu',
-          'YlGn',
-          'YlGnBu',
-          'YlOrBr',
-          'YlOrRd',
-        ],
-        singlehue: ['Blues', 'Greens', 'Greys', 'Oranges', 'Purples', 'Reds'],
-        diverging: [
-          'BrBG',
-          'PiYG',
-          'PRGn',
-          'PuOr',
-          'RdBu',
-          'RdGy',
-          'RdYlBu',
-          'RdYlGn',
-          'Spectral',
-        ],
-        qualitative: [
-          'Accent',
-          'Dark2',
-          'Paired',
-          'Pastel1',
-          'Pastel2',
-          'Set1',
-          'Set2',
-          'Set3',
-        ],
-      },
     };
   },
   created() {
@@ -163,7 +127,6 @@ export default {
     generateSettings() {
       const settings = {
         layer: {},
-        material: {},
         lighting: {},
         custom: {},
       };
@@ -195,7 +158,6 @@ export default {
         ...this.settings.layer,
         ...e.layerSettings.gridCellLayer,
       };
-      console.log(this.deck);
     },
     updateSettings(updatedSettings) {
       const s = updatedSettings.settings;
@@ -218,6 +180,13 @@ export default {
         this.layerSettings.gridCellLayer.elevationScale = Number(
           s.elevationScale,
         ); // This is necessary because Vue.js converts the property to a string.
+        if (s.advancedMaterial) {
+          this.layerSettings.gridCellLayer.material = {
+            ambient: Number(s.ambientMaterial),
+            diffuse: Number(s.diffuseMaterial),
+            shininess: Number(s.shininess),
+          };
+        }
         this.deck.setProps({
           layers: [
             new GridCellLayer(this.layerSettings.gridCellLayer),

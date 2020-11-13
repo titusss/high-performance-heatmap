@@ -8,8 +8,10 @@
         :class="{ option_button_active: activeOptionId === option.id }"
         v-for="option in options"
         :key="option.id"
+        :id="option.id"
       >
         <img class="option_icon" :src="require(`@/assets/${option.id}.svg`)" />
+        <b-tooltip :target="option.id" :delay="tooltipDelay">{{option.description}}</b-tooltip>
       </div>
     </div>
     <b-collapse
@@ -54,26 +56,52 @@ export default {
         {
           id: 'goHome',
           label: 'Home',
+          description: 'Jump to default view.',
         },
         {
           id: 'deckglSettings',
           label: 'Settings',
+          description: 'Change colors, scaling, etc.',
         },
         {
           id: 'exportImage',
           label: 'Export Image',
+          description: 'Download SVG/PNG picture.',
         },
       ],
-      activeOptionId: null,
+      activeOptionId: 'deckglSettings',
+      homeCamera: {
+        id: 'Top',
+        viewState: {
+          pitch: 0,
+          bearing: -90,
+          latitude: 0.02,
+          longitude: 0.05,
+          zoom: 11,
+        },
+        layerSettings: {
+          gridCellLayer: {
+            extruded: false,
+          },
+        },
+      },
+      tooltipDelay: { show: 600, hide: 0 },
     };
   },
   methods: {
     setActiveOption(id) {
       if (this.activeOptionId !== id) {
         this.activeOptionId = id;
+        if (id === 'goHome') {
+          this.goHome();
+        }
       } else {
         this.activeOptionId = null;
       }
+    },
+    goHome() {
+      this.$emit('active-camera-selected', this.homeCamera);
+      this.activeOptionId = null;
     },
   },
 };
@@ -108,7 +136,7 @@ label {
   background-color: #1c1c29 !important;
   border-radius: 5px;
 }
-.option_button_active>img {
+.option_button_active > img {
   filter: saturate(0) brightness(1.8);
 }
 .option_button > img {

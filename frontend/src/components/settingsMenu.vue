@@ -81,12 +81,19 @@
               "
               ><template v-slot:button-content>
                 {{ localSettings[input.propertyType][input.id].label }}
+                <div class="gradient-preview" id="selected-gradient-preview"
+                  :style="getColorGradientCss( localSettings[input.propertyType][input.id].label )">
+                </div>
               </template>
               <b-dropdown-item-button
                 v-for="gradient in input.options"
-                :key="gradient.label"
-                @click="localSettings[input.propertyType][input.id] = gradient">
-                {{gradient.label}}
+                :key="gradient"
+                @click="localSettings[input.propertyType][input.id].label = gradient,
+                localSettings[input.propertyType][input.id].value = gradient">
+                <span class="gradient-label">{{gradient}}</span>
+                <div class="gradient-preview"
+                  :style="getColorGradientCss( gradient )">
+                </div>
               </b-dropdown-item-button>
             </b-dropdown>
           </b-form-group>
@@ -97,6 +104,8 @@
 </template>
 
 <script>
+import chroma from 'chroma-js';
+
 export default {
   props: {
     settings: Object,
@@ -129,6 +138,20 @@ export default {
   },
   created() {
     this.$emit('settings-changed', { type: 'layer', settings: this.localSettings.layer });
+  },
+  methods: {
+    getColorGradientCss(gradientName) {
+    // Maybe generate an Object when component is created() to prevent render on call.
+      const gradientSteps = 10;
+      const colorArray = [];
+      const colorGradient = chroma
+        .scale(gradientName)
+        .domain([0, gradientSteps]);
+      for (let i = 0; i < gradientSteps; i += 1) {
+        colorArray.push(colorGradient(i));
+      }
+      return `background-image: linear-gradient(to right, ${colorArray})`;
+    },
   },
 };
 </script>
@@ -186,5 +209,33 @@ label {
   text-decoration: none !important;
   color: #2c3e50;
   padding: 0px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.gradient-label {
+  margin-right: .25rem;
+}
+.dropdown-item {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  padding: .25rem 1.5rem !important;
+}
+.gradient-preview {
+  width: 3rem;
+  height: 1.5rem;
+  border-radius: .75rem;
+  margin-left: auto;
+}
+#selected-gradient-preview {
+  margin: .25rem;
+}
+.form-row {
+  align-items: center !important;
+}
+.dropdown-menu.show {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
 }
 </style>

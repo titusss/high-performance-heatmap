@@ -19,6 +19,14 @@
             "propertyType": "layer"
           },
           {
+            "id": "extruded",
+            "label": "3D Extrusion",
+            "type": "checkbox",
+            "labelCols": 6,
+            "value": true,
+            "propertyType": "layer"
+          },
+          {
             "id": "elevationScale",
             "label": "Elevation",
             "type": "range",
@@ -29,14 +37,6 @@
             "value": 200,
             "propertyType": "layer",
             "valueDependencyId": "extruded"
-          },
-          {
-            "id": "extruded",
-            "label": "3D Extrusion",
-            "type": "checkbox",
-            "labelCols": 6,
-            "value": true,
-            "propertyType": "layer"
           },
           {
             "id": "opacity",
@@ -86,34 +86,41 @@
               "value": "RdYlGn"
             },
             "options": [
-              {
-                "label": "RdYlGn",
-                "value": "RdYlGn"
-              },
-              {
-                "label": "Spectral",
-                "value": "Spectral"
-              },
-              {
-                "label": "BuGn",
-                "value": "BuGn"
-              },
-              {
-                "label": "BuPu",
-                "value": "BuPu"
-              },
-              {
-                "label": "GnBu",
-                "value": "GnBu"
-              },
-              {
-                "label": "OrRd",
-                "value": "OrRd"
-              },
-              {
-                "label": "PuBu",
-                "value": "PuBu"
-              }
+              "BuGn",
+              "BuPu",
+              "GnBu",
+              "OrRd",
+              "PuBu",
+              "PuBuGn",
+              "PuRd",
+              "RdPu",
+              "YlGn",
+              "YlGnBu",
+              "YlOrBr",
+              "YlOrRd",
+              "Blues",
+              "Greens",
+              "Greys",
+              "Oranges",
+              "Purples",
+              "Reds",
+              "BrBG",
+              "PiYG",
+              "PRGn",
+              "PuOr",
+              "RdBu",
+              "RdGy",
+              "RdYlBu",
+              "RdYlGn",
+              "Spectral",
+              "Accent",
+              "Dark2",
+              "Paired",
+              "Pastel1",
+              "Pastel2",
+              "Set1",
+              "Set2",
+              "Set3"
             ]
           }
         ]
@@ -192,7 +199,7 @@
             "labelCols": 6,
             "value": false,
             "valueDependencyId": "material",
-            "propertyType": "material"
+            "propertyType": "layer"
           },
           {
             "id": "ambientMaterial",
@@ -204,7 +211,7 @@
             "labelCols": 5,
             "value": 0.5,
             "valueDependencyId": "advancedMaterial",
-            "propertyType": "lighting"
+            "propertyType": "layer"
           },
           {
             "id": "diffuseMaterial",
@@ -216,7 +223,7 @@
             "labelCols": 5,
             "value": 0.5,
             "valueDependencyId": "advancedMaterial",
-            "propertyType": "lighting"
+            "propertyType": "layer"
           },
           {
             "id": "shininess",
@@ -228,7 +235,7 @@
             "labelCols": 5,
             "value": 100,
             "valueDependencyId": "advancedMaterial",
-            "propertyType": "lighting"
+            "propertyType": "layer"
           }
         ]
       }
