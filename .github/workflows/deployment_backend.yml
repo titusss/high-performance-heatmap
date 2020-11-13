@@ -117,6 +117,7 @@ jobs:
           echo Replace placeholder image name with image path id
           cd $SYSTEM_CONTEXT/kubernetes
           perl -pi -e 's|mongo_connection_placeholder|"${{ secrets.MONGO_CONNECTION_STRING }}"|' deployment.yml
+          sed -i "s|CLUSTERPLACEHOLDER|@cluster0|g" deployment.yml
           sed -i "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" deployment.yml
           cat deployment.yml
         env:
