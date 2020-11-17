@@ -1,5 +1,5 @@
 <p align="center">
- <a href=""><img width="70%" src="docs/resources/header_logo.svg" /></a>
+ <a href=""><img width="20%" src="docs/resources/header_logo.svg" /></a>
 </p>
 
 ## 2D & 3D Heatmap for visualizing >1,000,000 cells
