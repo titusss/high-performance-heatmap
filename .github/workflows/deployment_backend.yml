@@ -119,11 +119,9 @@ jobs:
           perl -pi -e 's|mongo_connection_placeholder|"${{ secrets.MONGO_CONNECTION_STRING }}"|' deployment.yml
           sed -i "s|CLUSTERPLACEHOLDER|@cluster0|g" deployment.yml
           sed -i "s|{{image_name_placeholder}}|$IMAGE_ID:$GITHUB_SHA|g" deployment.yml
-          sed -i "s|chart_studio_key_placeholder|$PLOTLY_TOKEN|g" deployment.yml
           cat deployment.yml
         env:
           TOKEN: ${{ secrets.MONGO_CONNECTION_STRING }}
-          PLOTLY_TOKEN: $ {{ secrets.CHART_STUDIO_API_KEY }}
           
       - name: Rancher
         run: |
