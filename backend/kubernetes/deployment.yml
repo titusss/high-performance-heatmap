@@ -22,5 +22,7 @@ spec:
         env:
         - name: testend
           value: mongo_connection_placeholder
+        - name: CHART_STUDIO_API_KEY
+          value: chart_studio_key_placeholder
       imagePullSecrets:
       - name: githubdockerregistry
