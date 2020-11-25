@@ -4,6 +4,17 @@
     <div class="mb-4">
       <div class="header mt-3 mb-2">Download Top View as SVG</div>
       <!-- <label>Export the 2D top view of the heatmap.</label> -->
+        <b-form inline class="mb-1 custom-b-form">
+          <b-form-group label="Export text" label-for="checkbox-1">
+          <b-form-checkbox
+          id="checkbox-1"
+          v-model="showText"
+          name="checkbox-1"
+          value="true"
+          unchecked-value="false"
+        />
+         </b-form-group>
+        </b-form>
       <b-button block variant="dark" size="sm" @click="exportCanvasSvg">
         <!-- <img :src="require(`@/assets/exportImage.svg`)"> Download SVG -->
         <b-icon icon="download" aria-hidden="true"></b-icon> SVG Heatmap
@@ -23,6 +34,13 @@ export default {
     layerSettings: Object,
     colorGradient: Function,
   },
+  data() {
+    return {
+      xMargin: undefined,
+      yMargin: undefined,
+      showText: 'true',
+    };
+  },
   methods: {
     exportCanvasSvg() {
       // This needs to be slimmed down.
@@ -31,38 +49,72 @@ export default {
       const svgNS = svg.namespaceURI;
       svg.setAttribute('id', 'downloadble_svg');
       svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      const size = this.layerSettings.cellSize / 50;
-      for (let i = 0; i < this.layerSettings.data.length; i += 1) {
+      const size = this.layerSettings.gridCellLayer.cellSize / 50;
+      const cellGroup = document.createElementNS(svgNS, 'g');
+      if (this.showText === 'true') {
+        this.xMargin = 80;
+        this.yMargin = 100;
+        const columnGroup = document.createElementNS(svgNS, 'g');
+        const rowGroup = document.createElementNS(svgNS, 'g');
+        rowGroup.setAttribute('style', 'font-size: 11px;font-family: HelveticaNeue, Helvetica Neue;text-align: right;');
+        columnGroup.setAttribute('style', 'font-size: 11px;font-family: HelveticaNeue, Helvetica Neue;');
+        svg.appendChild(rowGroup);
+        svg.appendChild(columnGroup);
+        for (let i = 0; i < this.layerSettings.columnTextLayer.data.length; i += 1) {
+          const columnText = document.createElementNS(svgNS, 'text');
+          const columnTextNode = document
+            .createTextNode(this.layerSettings.columnTextLayer.data[i].VALUE);
+          columnText.setAttribute('transform', `rotate(-90) translate(-90, ${this.layerSettings.columnTextLayer.data[i].COORDINATES[1] * 2220 + this.xMargin + 4})`);
+          columnText.appendChild(columnTextNode);
+          columnGroup.appendChild(columnText);
+        }
+        for (let j = 0; j < this.layerSettings.rowTextLayer.data.length; j += 1) {
+          const rowText = document.createElementNS(svgNS, 'text');
+          const rowTextNode = document
+            .createTextNode(this.layerSettings.rowTextLayer.data[j].VALUE);
+          rowText.setAttribute('x', 0);
+          rowText.setAttribute('y', this.layerSettings.rowTextLayer.data[j].COORDINATES[0] * 2220 + this.yMargin + 4);
+          rowText.appendChild(rowTextNode);
+          rowGroup.appendChild(rowText);
+        }
+      } else {
+        this.xMargin = 0;
+        this.yMargin = 0;
+      }
+      for (let k = 1; k < this.layerSettings.gridCellLayer.data.length; k += 1) {
         const rect = document.createElementNS(svgNS, 'rect');
         rect.setAttribute(
           'x',
-          this.layerSettings.data[i].COORDINATES[1] * 2220,
+          this.layerSettings.gridCellLayer.data[k].COORDINATES[1] * 2220 + this.xMargin,
         );
         rect.setAttribute(
           'y',
-          this.layerSettings.data[i].COORDINATES[0] * 2220,
+          this.layerSettings.gridCellLayer.data[k].COORDINATES[0] * 2220 + this.yMargin,
         );
         rect.setAttribute('width', size);
         rect.setAttribute('height', size);
         rect.setAttribute(
           'fill',
-          this.colorGradient(this.layerSettings.data[i].VALUE).hex(),
+          this.colorGradient(this.layerSettings.gridCellLayer.data[k].VALUE).hex(),
         );
-        svg.appendChild(rect);
+        cellGroup.appendChild(rect);
       }
+      svg.appendChild(cellGroup);
       svg.setAttribute(
         'width',
-        this.layerSettings.data[this.layerSettings.data.length - 1]
+        this.layerSettings.gridCellLayer.data[this.layerSettings.gridCellLayer.data.length - 1]
           .COORDINATES[1]
           * 2220
-          + this.layerSettings.cellSize / 50,
+          + this.layerSettings.gridCellLayer.cellSize / 50
+          + 100,
       );
       svg.setAttribute(
         'height',
-        this.layerSettings.data[this.layerSettings.data.length - 1]
+        this.layerSettings.gridCellLayer.data[this.layerSettings.gridCellLayer.data.length - 1]
           .COORDINATES[0]
           * 2220
-          + this.layerSettings.cellSize / 50,
+          + this.layerSettings.gridCellLayer.cellSize / 50
+          + 100,
       );
       domElement.appendChild(svg);
       const svgData = document.getElementById('downloadble_svg').outerHTML;
@@ -109,5 +161,11 @@ button {
   font-weight: 400;
   text-decoration: none !important;
   font-size: 12px !important;
+}
+.form-group{
+  margin: auto;
+  font-family:
+    "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 </style>

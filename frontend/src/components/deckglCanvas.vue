@@ -10,7 +10,7 @@
       @active-camera-selected="changeCamera"
       :settings="settings"
       :settingsTemplate="settingsTemplate"
-      :layerSettings="layerSettings.gridCellLayer"
+      :layerSettings="layerSettings"
       :colorGradient="colorGradient"
     />
     <cameraMenu
@@ -67,7 +67,7 @@ export default {
           getFillColor: (d) => this.colorGradient(d.VALUE).rgb(),
           updateTriggers: { getFillColor: this.colorGradientPreset },
         },
-        textLayer: {
+        rowTextLayer: {
           id: 'row-text-layer',
           data: null,
           sizeUnits: 'meters',
@@ -76,6 +76,20 @@ export default {
           getSize: 450,
           getAngle: 90,
           getTextAnchor: 'end',
+          getAlignmentBaseline: 'center',
+          billboard: false,
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, sans-serif',
+        },
+        columnTextLayer: {
+          id: 'column-text-layer',
+          data: null,
+          sizeUnits: 'meters',
+          getPosition: (d) => d.COORDINATES,
+          getText: (d) => d.VALUE,
+          getSize: 450,
+          getAngle: 180,
+          getTextAnchor: 'start',
           getAlignmentBaseline: 'center',
           billboard: false,
           fontFamily:
@@ -153,7 +167,7 @@ export default {
         ...e.layerSettings.gridCellLayer,
       };
       // this.deck.setProps({ layers: [new GridCellLayer(this.layerSettings.gridCellLayer),
-      // new TextLayer(this.layerSettings.textLayer)] })
+      // new rowTextLayer(this.layerSettings.rowTextLayer)] })
       this.settings.layer = {
         ...this.settings.layer,
         ...e.layerSettings.gridCellLayer,
@@ -190,7 +204,8 @@ export default {
         this.deck.setProps({
           layers: [
             new GridCellLayer(this.layerSettings.gridCellLayer),
-            new TextLayer(this.layerSettings.textLayer),
+            new TextLayer(this.layerSettings.rowTextLayer),
+            new TextLayer(this.layerSettings.columnTextLayer),
           ],
         });
       } else if (updatedSettings.type === 'lighting') {
@@ -234,7 +249,8 @@ export default {
         .then((res) => {
           [
             this.layerSettings.gridCellLayer.data,
-            this.layerSettings.textLayer.data,
+            this.layerSettings.rowTextLayer.data,
+            this.layerSettings.columnTextLayer.data,
             this.highestValue,
             this.lowestValue,
           ] = this.processJsonData(res.data);
@@ -246,7 +262,8 @@ export default {
     processJsonData(json) {
       // This could be moved to the python backend for performace reasons.
       const gridCellLayerData = [];
-      const textLayerData = [];
+      const rowTextLayerData = [];
+      const columnTextLayerData = [];
       const columns = Object.keys(json[0]);
       let lowestValue = 0;
       let highestValue = 0;
@@ -269,6 +286,15 @@ export default {
         }
         // Only calculate x coordinate when the column changes.
         const scaledColumnCoordinate = columnCoordinate / 140;
+        if (columnIndex !== 0) {
+          columnTextLayerData.push({
+            COORDINATES: [
+              -this.constants.textMarginTop,
+              scaledColumnCoordinate - this.constants.textMarginRight,
+            ],
+            VALUE: Object.keys(json[0])[columnIndex],
+          });
+        }
         for (let rowIndex = 0; rowIndex < json.length; rowIndex += 1) {
           const gridCellLayerCell = {
             COLUMN: columnName,
@@ -292,7 +318,7 @@ export default {
             lowestValue = gridCellLayerCell.VALUE;
           }
           if (columnIndex === 0) {
-            textLayerData.push({
+            rowTextLayerData.push({
               COORDINATES: [
                 gridCellLayerCell.COORDINATES[0] + this.constants.textMarginTop,
                 this.constants.textMarginRight,
@@ -302,7 +328,7 @@ export default {
           }
         }
       }
-      return [gridCellLayerData, textLayerData, highestValue, lowestValue];
+      return [gridCellLayerData, rowTextLayerData, columnTextLayerData, highestValue, lowestValue];
     },
     getTooltip({ object }) {
       if (!object) {
