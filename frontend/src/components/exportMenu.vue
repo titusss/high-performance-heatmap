@@ -81,6 +81,7 @@ export default {
         this.xMargin = 0;
         this.yMargin = 0;
       }
+      let orientation;
       for (let k = 1; k < this.layerSettings.gridCellLayer.data.length; k += 1) {
         const rect = document.createElementNS(svgNS, 'rect');
         rect.setAttribute(
@@ -93,9 +94,16 @@ export default {
         );
         rect.setAttribute('width', size);
         rect.setAttribute('height', size);
+        // Following lines are heavy on performance. Maybe check for lowest_value < 0?
+        if (!this.layerSettings.gridCellLayer.data[k].ORIENTATION) {
+          orientation = 1;
+        } else {
+          orientation = this.layerSettings.gridCellLayer.data[k].ORIENTATION;
+        }
         rect.setAttribute(
           'fill',
-          this.colorGradient(this.layerSettings.gridCellLayer.data[k].VALUE).hex(),
+          this.colorGradient(this.layerSettings.gridCellLayer.data[k].VALUE
+            * orientation).hex(),
         );
         cellGroup.appendChild(rect);
       }

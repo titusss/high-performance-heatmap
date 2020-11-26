@@ -16,6 +16,7 @@
     <cameraMenu
       class="camera_menu menu_c"
       :activeCamera="activeCamera"
+      :elevationScale="layerSettings.gridCellLayer.elevationScale"
       @active-camera-selected="changeCamera"
     />
     <div class="deck-container" id="deck-container">
@@ -57,6 +58,7 @@ export default {
       lowestValue: null,
       colorGradient: null,
       colorGradientPreset: null,
+      elevationScale: 200,
       advancedLighting: false,
       layerSettings: {
         gridCellLayer: {
@@ -65,7 +67,6 @@ export default {
           getPosition: (d) => d.COORDINATES,
           getElevation: (d) => d.VALUE,
           getFillColor: (d) => this.colorGradient(d.VALUE).rgb(),
-          updateTriggers: { getFillColor: this.colorGradientPreset },
         },
         rowTextLayer: {
           id: 'row-text-layer',
@@ -160,6 +161,7 @@ export default {
     },
     changeCamera(e) {
       this.activeCamera = e.id;
+      console.log(e);
       this.currentViewState = { ...this.currentViewState, ...e.viewState };
       this.deck.setProps({ viewState: this.currentViewState });
       this.layerSettings.gridCellLayer = {
@@ -187,18 +189,26 @@ export default {
           this.colorGradient = chroma
             .scale(this.colorGradientPreset)
             .domain([this.lowestValue, this.highestValue]);
-          this.layerSettings.gridCellLayer.updateTriggers = {
-            getFillColor: this.colorGradientPreset,
-          };
         }
         this.layerSettings.gridCellLayer.elevationScale = Number(
           s.elevationScale,
         ); // This is necessary because Vue.js converts the property to a string.
+        this.elevationScale = this.layerSettings.gridCellLayer.elevationScale;
         if (s.advancedMaterial) {
           this.layerSettings.gridCellLayer.material = {
             ambient: Number(s.ambientMaterial),
             diffuse: Number(s.diffuseMaterial),
             shininess: Number(s.shininess),
+          };
+        }
+        if (this.lowestValue < 0) {
+          this.layerSettings.gridCellLayer.updateTriggers = {
+            getFillColor: this.colorGradientPreset,
+            getPosition: this.elevationScale,
+          };
+        } else {
+          this.layerSettings.gridCellLayer.updateTriggers = {
+            getFillColor: this.colorGradientPreset,
           };
         }
         this.deck.setProps({
@@ -254,6 +264,9 @@ export default {
             this.highestValue,
             this.lowestValue,
           ] = this.processJsonData(res.data);
+          if (this.lowestValue < 0) {
+            this.configureNegativeValues();
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -302,7 +315,6 @@ export default {
             ROW: json[rowIndex][columns[0]],
             VALUE: json[rowIndex][columns[columnIndex]],
           };
-          gridCellLayerData.push(gridCellLayerCell);
           if (
             gridCellLayerCell.VALUE > highestValue
             && gridCellLayerCell.VALUE !== Infinity
@@ -317,6 +329,11 @@ export default {
           ) {
             lowestValue = gridCellLayerCell.VALUE;
           }
+          if (gridCellLayerCell.VALUE < 0) {
+            gridCellLayerCell.VALUE *= -1;
+            gridCellLayerCell.ORIENTATION = -1;
+          }
+          gridCellLayerData.push(gridCellLayerCell);
           if (columnIndex === 0) {
             rowTextLayerData.push({
               COORDINATES: [
@@ -328,7 +345,30 @@ export default {
           }
         }
       }
+      // for (let i = 0; i < gridCellLayerData.length; i += 1) {
+      //   if (gridCellLayerData[i].VALUE < 0) {
+      //     gridCellLayerData[i].ORIENTATION = 1;
+      //     console.log(gridCellLayerData[i].ORIENTATION);
+      //   } else {
+      //     gridCellLayerData[i].ORIENTATION = 1;
+      //   }
+      //   if (lowestValue < 0) {
+      //     gridCellLayerData[i].VALUE += -lowestValue;
+      //   }
+      // }
+      // console.log(gridCellLayerData);
+      // if (lowestValue < 0) {
+      //   for (let i = 0; i < gridCellLayerData.length; i += 1) {
+      //     gridCellLayerData[i].VALUE += -lowestValue;
+      //   }
+      // }
       return [gridCellLayerData, rowTextLayerData, columnTextLayerData, highestValue, lowestValue];
+    },
+    configureNegativeValues() {
+      this.layerSettings.gridCellLayer.getPosition = (d) => [d.COORDINATES[0],
+        d.COORDINATES[1], d.VALUE * (this.elevationScale * d.ORIENTATION)];
+      this.layerSettings.gridCellLayer.getFillColor = (d) => ((!d.ORIENTATION)
+        ? this.colorGradient(d.VALUE).rgb() : this.colorGradient(d.VALUE * d.ORIENTATION).rgb());
     },
     getTooltip({ object }) {
       if (!object) {
@@ -336,7 +376,12 @@ export default {
       }
       const column = object.COLUMN;
       const row = object.ROW;
-      const count = object.VALUE;
+      let count;
+      if (!object.ORIENTATION) {
+        count = object.VALUE;
+      } else {
+        count = object.VALUE * object.ORIENTATION;
+      }
       return {
         html: `\
         ${column}<br>

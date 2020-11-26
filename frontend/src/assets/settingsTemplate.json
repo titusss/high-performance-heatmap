@@ -30,7 +30,7 @@
             "id": "elevationScale",
             "label": "Elevation",
             "type": "range",
-            "min": 0,
+            "min": -100,
             "max": 1000,
             "step": 5,
             "labelCols": 5,

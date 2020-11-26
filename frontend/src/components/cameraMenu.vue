@@ -3,7 +3,7 @@
   <div class="main_parent">
     <div class="buttons_background">
       <div
-        @click="$emit('active-camera-selected', option)"
+        @click="emitCameraChange(option)"
         class="option_button"
         :class="{ option_button_active: activeCamera === option.id }"
         v-for="option in cameraOptions"
@@ -25,9 +25,29 @@
 export default {
   props: {
     activeCamera: String,
+    elevationScale: Number,
+  },
+  watch: {
+    elevationScale() {
+      if (this.activeCamera !== 'Top') {
+        this.lastElevationScale = this.elevationScale;
+      }
+    },
+  },
+  methods: {
+    emitCameraChange(option) {
+      if (option.id !== 'Top') {
+        const updatedOption = option;
+        updatedOption.layerSettings.gridCellLayer.elevationScale = this.lastElevationScale;
+        this.$emit('active-camera-selected', updatedOption);
+      } else {
+        this.$emit('active-camera-selected', option);
+      }
+    },
   },
   data() {
     return {
+      lastElevationScale: 0,
       cameraOptions: [
         {
           id: '3D',
@@ -37,6 +57,7 @@ export default {
           },
           layerSettings: {
             gridCellLayer: {
+              elevationScale: null,
               extruded: true,
             },
           },
@@ -49,6 +70,7 @@ export default {
           },
           layerSettings: {
             gridCellLayer: {
+              elevationScale: 0,
               extruded: false,
             },
           },
@@ -61,6 +83,7 @@ export default {
           },
           layerSettings: {
             gridCellLayer: {
+              elevationScale: null,
               extruded: true,
             },
           },
@@ -73,6 +96,7 @@ export default {
           },
           layerSettings: {
             gridCellLayer: {
+              elevationScale: null,
               extruded: true,
             },
           },

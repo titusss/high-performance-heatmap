@@ -137,6 +137,7 @@ export default {
     };
   },
   created() {
+    console.log(this.settings);
     this.$emit('settings-changed', { type: 'layer', settings: this.localSettings.layer });
   },
   methods: {

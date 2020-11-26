@@ -81,6 +81,7 @@ export default {
         },
         layerSettings: {
           gridCellLayer: {
+            elevationScale: 0,
             extruded: false,
           },
         },
