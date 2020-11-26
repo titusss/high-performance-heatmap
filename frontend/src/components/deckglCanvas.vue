@@ -161,7 +161,6 @@ export default {
     },
     changeCamera(e) {
       this.activeCamera = e.id;
-      console.log(e);
       this.currentViewState = { ...this.currentViewState, ...e.viewState };
       this.deck.setProps({ viewState: this.currentViewState });
       this.layerSettings.gridCellLayer = {
