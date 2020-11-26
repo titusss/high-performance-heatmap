@@ -100,7 +100,7 @@ export default {
         latitude: 0.02,
         longitude: 0.05,
         zoom: 11,
-        minZoom: 2,
+        minZoom: 4,
         pitch: 40,
         maxPitch: 89,
         bearing: -40,
