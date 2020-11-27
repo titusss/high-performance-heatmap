@@ -263,6 +263,8 @@ export default {
             this.highestValue,
             this.lowestValue,
           ] = this.processJsonData(res.data);
+          console.log(this.lowestValue);
+          console.log(this.highestValue);
           if (this.lowestValue < 0) {
             this.configureNegativeValues();
           }
@@ -281,24 +283,26 @@ export default {
       let highestValue = 0;
       let lastPrefix;
       let columnName;
-      let columnCoordinate = 0;
+      let columnCoordinate = -1;
+      let scaledColumnCoordinate = 0;
       for (let columnIndex = 0; columnIndex < columns.length; columnIndex += 1) {
-        if (columns[columnIndex].startsWith('(')) {
-          const splitIndex = columns[columnIndex].indexOf(') ');
-          const prefix = columns[columnIndex].slice(0, splitIndex + 1);
-          if (prefix !== lastPrefix) {
-            lastPrefix = prefix;
-            columnCoordinate += 1.4;
+        if (columnIndex !== 0) {
+          if (columns[columnIndex].startsWith('(') && columns[columnIndex].includes(') ')) {
+            const splitIndex = columns[columnIndex].indexOf(') ');
+            const prefix = columns[columnIndex].slice(0, splitIndex + 1);
+            if (prefix !== lastPrefix) {
+              lastPrefix = prefix;
+              columnCoordinate += 1.4;
+            } else {
+              columnCoordinate += 1;
+            }
+            columnName = columns[columnIndex].slice(splitIndex + 2);
           } else {
+            columnName = columns[columnIndex];
             columnCoordinate += 1;
           }
-          columnName = columns[columnIndex].slice(splitIndex + 2);
-        } else {
-          columnName = columns[columnIndex];
-        }
-        // Only calculate x coordinate when the column changes.
-        const scaledColumnCoordinate = columnCoordinate / 140;
-        if (columnIndex !== 0) {
+          // Only calculate x coordinate when the column changes.
+          scaledColumnCoordinate = columnCoordinate / 140;
           columnTextLayerData.push({
             COORDINATES: [
               -this.constants.textMarginTop,
@@ -308,38 +312,37 @@ export default {
           });
         }
         for (let rowIndex = 0; rowIndex < json.length; rowIndex += 1) {
-          const gridCellLayerCell = {
-            COLUMN: columnName,
-            COORDINATES: [rowIndex / 140, scaledColumnCoordinate],
-            ROW: json[rowIndex][columns[0]],
-            VALUE: json[rowIndex][columns[columnIndex]],
-          };
-          if (
-            gridCellLayerCell.VALUE > highestValue
-            && gridCellLayerCell.VALUE !== Infinity
-            && gridCellLayerCell.VALUE !== -Infinity
-          ) {
-            highestValue = gridCellLayerCell.VALUE;
-          }
-          if (
-            gridCellLayerCell.VALUE < lowestValue
-            && gridCellLayerCell.VALUE !== -Infinity
-            && gridCellLayerCell.VALUE !== Infinity
-          ) {
-            lowestValue = gridCellLayerCell.VALUE;
-          }
-          if (gridCellLayerCell.VALUE < 0) {
-            gridCellLayerCell.VALUE *= -1;
-            gridCellLayerCell.ORIENTATION = -1;
-          }
-          gridCellLayerData.push(gridCellLayerCell);
-          if (columnIndex === 0) {
+          if (columnIndex !== 0) {
+            const gridCellLayerCell = {
+              COLUMN: columnName,
+              COORDINATES: [rowIndex / 140, scaledColumnCoordinate],
+              ROW: json[rowIndex][columns[0]],
+              VALUE: json[rowIndex][columns[columnIndex]],
+            };
+            if (
+              gridCellLayerCell.VALUE > highestValue
+              && Number.isFinite(gridCellLayerCell.VALUE)
+            ) {
+              highestValue = gridCellLayerCell.VALUE;
+            }
+            if (
+              gridCellLayerCell.VALUE < lowestValue
+              && Number.isFinite(gridCellLayerCell.VALUE)
+            ) {
+              lowestValue = gridCellLayerCell.VALUE;
+            }
+            if (gridCellLayerCell.VALUE < 0) {
+              gridCellLayerCell.VALUE *= -1;
+              gridCellLayerCell.ORIENTATION = -1;
+            }
+            gridCellLayerData.push(gridCellLayerCell);
+          } else {
             rowTextLayerData.push({
               COORDINATES: [
-                gridCellLayerCell.COORDINATES[0] + this.constants.textMarginTop,
+                rowIndex / 140 + this.constants.textMarginTop,
                 this.constants.textMarginRight,
               ],
-              VALUE: gridCellLayerCell.ROW,
+              VALUE: json[rowIndex][columns[0]],
             });
           }
         }
