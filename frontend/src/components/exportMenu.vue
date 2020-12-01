@@ -51,6 +51,7 @@ export default {
       svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
       const size = this.layerSettings.gridCellLayer.cellSize / 50;
       const cellGroup = document.createElementNS(svgNS, 'g');
+      cellGroup.setAttribute('style', 'font-size: 11px;font-family: HelveticaNeue, Helvetica Neue;text-align: right;');
       if (this.showText === 'true') {
         this.xMargin = 80;
         this.yMargin = 100;
@@ -81,8 +82,8 @@ export default {
         this.xMargin = 0;
         this.yMargin = 0;
       }
-      let orientation;
       for (let k = 1; k < this.layerSettings.gridCellLayer.data.length; k += 1) {
+        let orientation;
         const rect = document.createElementNS(svgNS, 'rect');
         rect.setAttribute(
           'x',
@@ -106,6 +107,20 @@ export default {
             * orientation).hex(),
         );
         cellGroup.appendChild(rect);
+      }
+      for (let l = 1; l < this.layerSettings.textCellLayer.data.length; l += 1) {
+        if (this.layerSettings.textCellLayer.data[l].VALUE) {
+          const text = document.createElementNS(svgNS, 'text');
+          const textNode = document
+            .createTextNode(this.layerSettings.textCellLayer.data[l].VALUE);
+          text.setAttribute('y', this.layerSettings.textCellLayer.data[l].COORDINATES[0] * 2220 + this.yMargin);
+          text.setAttribute('style', `font-size: ${32 / (this.layerSettings.textCellLayer.data[l].VALUE.length + 2.5)}px`);
+          // The following is a dumb quick-fix and should be replaced.
+          // Calculates the x position based on string length to center it.
+          text.setAttribute('x', this.layerSettings.textCellLayer.data[l].COORDINATES[1] * 2220 + this.xMargin - 8 + 4 / this.layerSettings.textCellLayer.data[l].VALUE.length);
+          text.appendChild(textNode);
+          cellGroup.appendChild(text);
+        }
       }
       svg.appendChild(cellGroup);
       svg.setAttribute(

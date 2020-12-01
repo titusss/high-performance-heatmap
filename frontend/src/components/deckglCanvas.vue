@@ -68,6 +68,21 @@ export default {
           getElevation: (d) => d.VALUE,
           getFillColor: (d) => this.colorGradient(d.VALUE).rgb(),
         },
+        textCellLayer: {
+          id: 'text-cell-layer',
+          data: null,
+          sizeUnits: 'meters',
+          getPosition: (d) => d.COORDINATES,
+          getText: (d) => d.VALUE,
+          // PERFORMANCE: Scale text based on the strings length
+          getSize: (d) => 1575 / (String(d.VALUE).length + 2.5),
+          getAngle: 90,
+          getTextAnchor: 'middle',
+          getAlignmentBaseline: 'center',
+          billboard: false,
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, sans-serif',
+        },
         rowTextLayer: {
           id: 'row-text-layer',
           data: null,
@@ -213,6 +228,7 @@ export default {
         this.deck.setProps({
           layers: [
             new GridCellLayer(this.layerSettings.gridCellLayer),
+            new TextLayer(this.layerSettings.textCellLayer),
             new TextLayer(this.layerSettings.rowTextLayer),
             new TextLayer(this.layerSettings.columnTextLayer),
           ],
@@ -258,13 +274,12 @@ export default {
         .then((res) => {
           [
             this.layerSettings.gridCellLayer.data,
+            this.layerSettings.textCellLayer.data,
             this.layerSettings.rowTextLayer.data,
             this.layerSettings.columnTextLayer.data,
             this.highestValue,
             this.lowestValue,
           ] = this.processJsonData(res.data);
-          console.log(this.lowestValue);
-          console.log(this.highestValue);
           if (this.lowestValue < 0) {
             this.configureNegativeValues();
           }
@@ -276,6 +291,7 @@ export default {
     processJsonData(json) {
       // This could be moved to the python backend for performace reasons.
       const gridCellLayerData = [];
+      const textCellLayerData = [];
       const rowTextLayerData = [];
       const columnTextLayerData = [];
       const columns = Object.keys(json[0]);
@@ -313,58 +329,59 @@ export default {
         }
         for (let rowIndex = 0; rowIndex < json.length; rowIndex += 1) {
           if (columnIndex !== 0) {
-            const gridCellLayerCell = {
-              COLUMN: columnName,
-              COORDINATES: [rowIndex / 140, scaledColumnCoordinate],
-              ROW: json[rowIndex][columns[0]],
-              VALUE: json[rowIndex][columns[columnIndex]],
-            };
-            if (
-              gridCellLayerCell.VALUE > highestValue
-              && Number.isFinite(gridCellLayerCell.VALUE)
-            ) {
-              highestValue = gridCellLayerCell.VALUE;
+            if (Number.isFinite(json[rowIndex][columns[columnIndex]])) {
+              const gridCellLayerCell = {
+                COLUMN: columnName,
+                COORDINATES: [rowIndex / 140, scaledColumnCoordinate],
+                ROW: json[rowIndex][columns[0]],
+                VALUE: json[rowIndex][columns[columnIndex]],
+              };
+              if (
+                gridCellLayerCell.VALUE > highestValue
+              ) {
+                highestValue = gridCellLayerCell.VALUE;
+              }
+              if (
+                gridCellLayerCell.VALUE < lowestValue
+              ) {
+                lowestValue = gridCellLayerCell.VALUE;
+              }
+              if (gridCellLayerCell.VALUE < 0) {
+                gridCellLayerCell.VALUE *= -1;
+                gridCellLayerCell.ORIENTATION = -1;
+              }
+              gridCellLayerData.push(gridCellLayerCell);
+            } else {
+              const textCellLayerCell = {
+                COLUMN: columnName,
+                COORDINATES: [
+                  rowIndex / 140 + this.constants.textMarginTop,
+                  scaledColumnCoordinate + this.constants.textMarginTop,
+                ],
+                ROW: json[rowIndex][columns[0]],
+                VALUE: json[rowIndex][columns[columnIndex]],
+              };
+              textCellLayerData.push(textCellLayerCell);
             }
-            if (
-              gridCellLayerCell.VALUE < lowestValue
-              && Number.isFinite(gridCellLayerCell.VALUE)
-            ) {
-              lowestValue = gridCellLayerCell.VALUE;
-            }
-            if (gridCellLayerCell.VALUE < 0) {
-              gridCellLayerCell.VALUE *= -1;
-              gridCellLayerCell.ORIENTATION = -1;
-            }
-            gridCellLayerData.push(gridCellLayerCell);
           } else {
             rowTextLayerData.push({
               COORDINATES: [
                 rowIndex / 140 + this.constants.textMarginTop,
-                this.constants.textMarginRight,
+                scaledColumnCoordinate,
               ],
-              VALUE: json[rowIndex][columns[0]],
+              VALUE: json[rowIndex][columns[columnIndex]],
             });
           }
         }
       }
-      // for (let i = 0; i < gridCellLayerData.length; i += 1) {
-      //   if (gridCellLayerData[i].VALUE < 0) {
-      //     gridCellLayerData[i].ORIENTATION = 1;
-      //     console.log(gridCellLayerData[i].ORIENTATION);
-      //   } else {
-      //     gridCellLayerData[i].ORIENTATION = 1;
-      //   }
-      //   if (lowestValue < 0) {
-      //     gridCellLayerData[i].VALUE += -lowestValue;
-      //   }
-      // }
-      // console.log(gridCellLayerData);
-      // if (lowestValue < 0) {
-      //   for (let i = 0; i < gridCellLayerData.length; i += 1) {
-      //     gridCellLayerData[i].VALUE += -lowestValue;
-      //   }
-      // }
-      return [gridCellLayerData, rowTextLayerData, columnTextLayerData, highestValue, lowestValue];
+      return [
+        gridCellLayerData,
+        textCellLayerData,
+        rowTextLayerData,
+        columnTextLayerData,
+        highestValue,
+        lowestValue,
+      ];
     },
     configureNegativeValues() {
       this.layerSettings.gridCellLayer.getPosition = (d) => [d.COORDINATES[0],
