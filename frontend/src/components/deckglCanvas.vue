@@ -60,6 +60,8 @@ export default {
       colorGradientPreset: null,
       elevationScale: 200,
       advancedLighting: false,
+      localMinGradientValue: null,
+      localMaxGradientValue: null,
       layerSettings: {
         gridCellLayer: {
           id: 'grid-gridCellLayerCell-layer',
@@ -174,6 +176,26 @@ export default {
       });
       return settings;
     },
+    updateTemplateSettings() {
+      const min = Math.round(this.lowestValue);
+      const max = Math.round(this.highestValue);
+      Object.keys(settingsTemplate).forEach((mode) => {
+        for (let i = 0; i < settingsTemplate[mode].settings.length; i += 1) {
+          for (
+            let j = 0;
+            j < settingsTemplate[mode].settings[i].inputs.length;
+            j += 1
+          ) {
+            if (settingsTemplate[mode].settings[i].inputs[j].id === 'maxGradientValue' || settingsTemplate[mode].settings[i].inputs[j].id === 'minGradientValue') {
+              settingsTemplate[mode].settings[i].inputs[j].max = max;
+              settingsTemplate[mode].settings[i].inputs[j].min = min;
+            }
+          }
+        }
+      });
+      this.settings.layer.maxGradientValue = max;
+      this.settings.layer.minGradientValue = min;
+    },
     changeCamera(e) {
       this.activeCamera = e.id;
       this.currentViewState = { ...this.currentViewState, ...e.viewState };
@@ -198,11 +220,17 @@ export default {
           ...this.layerSettings.gridCellLayer,
           ...s,
         };
-        if (this.colorGradientPreset !== s.gradientPreset.value) {
+        if (
+          this.colorGradientPreset !== s.gradientPreset.value
+          || this.localMinGradientValue !== s.minGradientValue
+          || this.localMaxGradientValue !== s.maxGradientValue
+        ) {
           this.colorGradientPreset = s.gradientPreset.value;
+          this.localMinGradientValue = s.minGradientValue;
+          this.localMaxGradientValue = s.maxGradientValue;
           this.colorGradient = chroma
             .scale(this.colorGradientPreset)
-            .domain([this.lowestValue, this.highestValue]);
+            .domain([s.minGradientValue, s.maxGradientValue]);
         }
         this.layerSettings.gridCellLayer.elevationScale = Number(
           s.elevationScale,
@@ -217,7 +245,11 @@ export default {
         }
         if (this.lowestValue < 0) {
           this.layerSettings.gridCellLayer.updateTriggers = {
-            getFillColor: this.colorGradientPreset,
+            getFillColor: [
+              this.colorGradientPreset,
+              this.localMinGradientValue,
+              this.localMaxGradientValue,
+            ],
             getPosition: this.elevationScale,
           };
         } else {
@@ -283,6 +315,7 @@ export default {
           if (this.lowestValue < 0) {
             this.configureNegativeValues();
           }
+          this.updateTemplateSettings();
         })
         .catch((error) => {
           console.log(error);

@@ -55,14 +55,6 @@
         "label": "Tooltip",
         "inputs": [
           {
-            "id": "enrichrAnalysis",
-            "label": "Enrichr Gene Analysis",
-            "type": "checkbox",
-            "labelCols": 6,
-            "value": false,
-            "propertyType": "custom"
-          },
-          {
             "id": "pickable",
             "label": "Show Tooltip",
             "type": "checkbox",
@@ -122,6 +114,28 @@
               "Set2",
               "Set3"
             ]
+          },
+          {
+            "id": "maxGradientValue",
+            "label": "Max Color Value",
+            "type": "range",
+            "min": null,
+            "max": null,
+            "step": 1,
+            "labelCols": 5,
+            "value": 100,
+            "propertyType": "layer"
+          },
+          {
+            "id": "minGradientValue",
+            "label": "Min Color Value",
+            "type": "range",
+            "min": null,
+            "max": null,
+            "step": 1,
+            "labelCols": 5,
+            "value": 1,
+            "propertyType": "layer"
           }
         ]
       }

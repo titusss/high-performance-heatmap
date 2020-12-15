@@ -55,6 +55,8 @@
                   ? !localSettings[input.propertyType][input.valueDependencyId]
                   : false
               "
+              v-b-tooltip.hover
+              :title="localSettings[input.propertyType][input.id]"
             ></b-form-input>
             <b-form-checkbox
               v-else-if="input.type === 'checkbox'"
