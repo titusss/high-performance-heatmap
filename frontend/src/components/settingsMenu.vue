@@ -25,7 +25,7 @@
       >
         <b-form-group
           v-for="block in settingsMode.settings"
-          :key="block.id"
+          :key="block.label"
           size="sm"
           label-align="left"
           :id="block.label"
@@ -36,7 +36,7 @@
             label-align="left"
             :label-cols="6"
             v-for="input in block.inputs"
-            :key="input.label"
+            :key="input.id"
             :label="input.label"
             :label-for="input.id"
             label-class="input_label"
@@ -78,7 +78,7 @@
               :id="input.id"
               :disabled="
                 input.valueDependencyId
-                  ? !localSettings[input.propertyType][input.valueDependencyId]
+                  ? !localSettings[input.propertyType][input.valueDependencyId] === input.condition
                   : false
               "
               ><template v-slot:button-content>
@@ -89,6 +89,7 @@
               </template>
               <b-dropdown-item-button
                 v-for="gradient in input.options"
+                :id="input.id"
                 :key="gradient"
                 @click="localSettings[input.propertyType][input.id].label = gradient,
                 localSettings[input.propertyType][input.id].value = gradient">
@@ -120,6 +121,12 @@ export default {
       },
       deep: true,
     },
+    'settings.gradient': {
+      handler() {
+        this.$emit('settings-changed', { type: 'gradient', settings: this.localSettings.gradient });
+      },
+      deep: true,
+    },
     'localSettings.material': {
       handler() {
         this.$emit('settings-changed', { type: 'material', settings: this.localSettings.material });
@@ -139,6 +146,7 @@ export default {
     };
   },
   created() {
+    this.$emit('settings-changed', { type: 'gradient', settings: this.localSettings.gradient });
     this.$emit('settings-changed', { type: 'layer', settings: this.localSettings.layer });
   },
   methods: {
@@ -204,7 +212,6 @@ label {
 }
 .dropdown-gradient {
   float: left;
-  margin-left: -5px;
   border-bottom: 2px solid #d6d8db;
 }
 .dropdown-gradient>button {

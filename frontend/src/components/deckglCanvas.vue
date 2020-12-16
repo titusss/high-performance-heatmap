@@ -54,21 +54,24 @@ export default {
         textMarginRight: -0.003,
         textMarginTop: 0.5 / 140,
       },
+      updateTriggerObjects: {
+        gradientUpdateTrigger: false,
+        elevationScale: 200,
+      },
+      colorGradientPreset: null,
       highestValue: null,
       lowestValue: null,
+      colorGradientDict: {},
       colorGradient: null,
-      colorGradientPreset: null,
-      elevationScale: 200,
       advancedLighting: false,
-      localMinGradientValue: null,
-      localMaxGradientValue: null,
+      subTables: {},
       layerSettings: {
         gridCellLayer: {
           id: 'grid-gridCellLayerCell-layer',
           data: null,
           getPosition: (d) => d.COORDINATES,
           getElevation: (d) => d.VALUE,
-          getFillColor: (d) => this.colorGradient(d.VALUE).rgb(),
+          getFillColor: (d) => this.colorGradientDict[d.TITLE](d.VALUE).rgb(),
         },
         textCellLayer: {
           id: 'text-cell-layer',
@@ -161,6 +164,7 @@ export default {
         layer: {},
         lighting: {},
         custom: {},
+        gradient: {},
       };
       Object.keys(settingsTemplate).forEach((mode) => {
         for (let i = 0; i < settingsTemplate[mode].settings.length; i += 1) {
@@ -175,26 +179,6 @@ export default {
         }
       });
       return settings;
-    },
-    updateTemplateSettings() {
-      const min = Math.round(this.lowestValue);
-      const max = Math.round(this.highestValue);
-      Object.keys(settingsTemplate).forEach((mode) => {
-        for (let i = 0; i < settingsTemplate[mode].settings.length; i += 1) {
-          for (
-            let j = 0;
-            j < settingsTemplate[mode].settings[i].inputs.length;
-            j += 1
-          ) {
-            if (settingsTemplate[mode].settings[i].inputs[j].id === 'maxGradientValue' || settingsTemplate[mode].settings[i].inputs[j].id === 'minGradientValue') {
-              settingsTemplate[mode].settings[i].inputs[j].max = max;
-              settingsTemplate[mode].settings[i].inputs[j].min = min;
-            }
-          }
-        }
-      });
-      this.settings.layer.maxGradientValue = max;
-      this.settings.layer.minGradientValue = min;
     },
     changeCamera(e) {
       this.activeCamera = e.id;
@@ -215,86 +199,122 @@ export default {
       const s = updatedSettings.settings;
       // It might be useful to use a switch case instead,
       // if the possible conditions grow beyond 5 items.
-      if (updatedSettings.type === 'layer') {
-        this.layerSettings.gridCellLayer = {
-          ...this.layerSettings.gridCellLayer,
-          ...s,
-        };
-        if (
-          this.colorGradientPreset !== s.gradientPreset.value
-          || this.localMinGradientValue !== s.minGradientValue
-          || this.localMaxGradientValue !== s.maxGradientValue
-        ) {
-          this.colorGradientPreset = s.gradientPreset.value;
-          this.localMinGradientValue = s.minGradientValue;
-          this.localMaxGradientValue = s.maxGradientValue;
-          this.colorGradient = chroma
-            .scale(this.colorGradientPreset)
-            .domain([s.minGradientValue, s.maxGradientValue]);
-        }
-        this.layerSettings.gridCellLayer.elevationScale = Number(
-          s.elevationScale,
-        ); // This is necessary because Vue.js converts the property to a string.
-        this.elevationScale = this.layerSettings.gridCellLayer.elevationScale;
-        if (s.advancedMaterial) {
-          this.layerSettings.gridCellLayer.material = {
-            ambient: Number(s.ambientMaterial),
-            diffuse: Number(s.diffuseMaterial),
-            shininess: Number(s.shininess),
+      switch (updatedSettings.type) {
+        case 'layer':
+          this.layerSettings.gridCellLayer = {
+            ...this.layerSettings.gridCellLayer,
+            ...s,
           };
-        }
-        if (this.lowestValue < 0) {
-          this.layerSettings.gridCellLayer.updateTriggers = {
-            getFillColor: [
-              this.colorGradientPreset,
-              this.localMinGradientValue,
-              this.localMaxGradientValue,
+          this.layerSettings.gridCellLayer.elevationScale = Number(
+            s.elevationScale,
+          ); // This is necessary because bootstrap converts the property to a string.
+          this.updateTriggerObjects.elevationScale = this
+            .layerSettings.gridCellLayer.elevationScale;
+          if (s.advancedMaterial) {
+            this.layerSettings.gridCellLayer.material = {
+              ambient: Number(s.ambientMaterial),
+              diffuse: Number(s.diffuseMaterial),
+              shininess: Number(s.shininess),
+            };
+          }
+          if (this.lowestValue < 0) {
+            this.layerSettings.gridCellLayer.updateTriggers = {
+              getFillColor: [
+                this.updateTriggerObjects.gradientUpdateTrigger,
+              ],
+              getPosition: this.updateTriggerObjects.elevationScale,
+            };
+          } else {
+            this.layerSettings.gridCellLayer.updateTriggers = {
+              getFillColor: [
+                this.updateTriggerObjects.gradientUpdateTrigger,
+              ],
+            };
+          }
+          this.deck.setProps({
+            layers: [
+              new GridCellLayer(this.layerSettings.gridCellLayer),
+              new TextLayer(this.layerSettings.textCellLayer),
+              new TextLayer(this.layerSettings.rowTextLayer),
+              new TextLayer(this.layerSettings.columnTextLayer),
             ],
-            getPosition: this.elevationScale,
-          };
-        } else {
-          this.layerSettings.gridCellLayer.updateTriggers = {
-            getFillColor: this.colorGradientPreset,
-          };
-        }
-        this.deck.setProps({
-          layers: [
-            new GridCellLayer(this.layerSettings.gridCellLayer),
-            new TextLayer(this.layerSettings.textCellLayer),
-            new TextLayer(this.layerSettings.rowTextLayer),
-            new TextLayer(this.layerSettings.columnTextLayer),
-          ],
-        });
-      } else if (updatedSettings.type === 'lighting') {
-        if (s.advancedLighting === true) {
+          });
+          break;
+        case 'gradient':
+          this.updateTriggerObjects.gradientUpdateTrigger = !this
+            .updateTriggerObjects.gradientUpdateTrigger;
+          this.colorGradientPreset = s.gradientPreset.value;
+          if (this.colorGradientPreset !== s.gradientPreset.value
+          || s.individualGradients === false) {
+            Object.keys(this.subTables).forEach((subTableTitle) => {
+              this.colorGradientDict[subTableTitle] = chroma
+                .scale(this.colorGradientPreset)
+                .domain([this.lowestValue, this.highestValue]);
+            });
+          } else {
+            Object.keys(this.subTables).forEach((subTableTitle) => {
+              this.colorGradientDict[subTableTitle] = chroma
+                .scale(s[subTableTitle].value)
+                .domain([this.subTables[subTableTitle].LOWEST_VALUE,
+                  this.subTables[subTableTitle].HIGHEST_VALUE]);
+            });
+          }
+          if (this.lowestValue < 0) {
+            this.layerSettings.gridCellLayer.updateTriggers = {
+              getFillColor: [
+                this.updateTriggerObjects.gradientUpdateTrigger,
+              ],
+              getPosition: this.updateTriggerObjects.elevationScale,
+            };
+          } else {
+            this.layerSettings.gridCellLayer.updateTriggers = {
+              getFillColor: [
+                this.updateTriggerObjects.gradientUpdateTrigger,
+              ],
+            };
+          }
+          this.deck.setProps({
+            layers: [
+              new GridCellLayer(this.layerSettings.gridCellLayer),
+              new TextLayer(this.layerSettings.textCellLayer),
+              new TextLayer(this.layerSettings.rowTextLayer),
+              new TextLayer(this.layerSettings.columnTextLayer),
+            ],
+          });
+          break;
+        case 'lighting':
+          if (s.advancedLighting === true) {
           // Only build new lights when advanced light is activated.
           // Probably not necessary but I speculate on performance advantages with this approach.
-          const ambient = new AmbientLight({
-            color: [255, 255, 255],
-            intensity: s.ambientLight,
-          });
-          const directionalLight1 = new DirectionalLight({
-            color: [255, 255, 255],
-            direction: [this.highestValue / 2, 5, 3000],
-            intensity: s.directionalLight1,
-          });
-          const directionalLight2 = new DirectionalLight({
-            color: [255, 255, 255],
-            position: [this.highestValue / 4, 0.1, 1000],
-            intensity: s.directionalLight2,
-          });
-          this.deck.setProps({
-            effects: [
-              new LightingEffect({
-                ambient,
-                directionalLight1,
-                directionalLight2,
-              }),
-            ],
-          });
-        } else {
-          this.deck.setProps({ effects: [] });
-        }
+            const ambient = new AmbientLight({
+              color: [255, 255, 255],
+              intensity: s.ambientLight,
+            });
+            const directionalLight1 = new DirectionalLight({
+              color: [255, 255, 255],
+              direction: [this.highestValue / 2, 5, 3000],
+              intensity: s.directionalLight1,
+            });
+            const directionalLight2 = new DirectionalLight({
+              color: [255, 255, 255],
+              position: [this.highestValue / 4, 0.1, 1000],
+              intensity: s.directionalLight2,
+            });
+            this.deck.setProps({
+              effects: [
+                new LightingEffect({
+                  ambient,
+                  directionalLight1,
+                  directionalLight2,
+                }),
+              ],
+            });
+          } else {
+            this.deck.setProps({ effects: [] });
+          }
+          break;
+        default:
+          console.log('Warning: No case found for this setting update.');
       }
       this.$emit('long-loading-finished');
     },
@@ -312,10 +332,10 @@ export default {
             this.highestValue,
             this.lowestValue,
           ] = this.processJsonData(res.data);
+          this.createSubTableGradientForms();
           if (this.lowestValue < 0) {
             this.configureNegativeValues();
           }
-          this.updateTemplateSettings();
         })
         .catch((error) => {
           console.log(error);
@@ -330,6 +350,8 @@ export default {
       const columns = Object.keys(json[0]);
       let lowestValue = 0;
       let highestValue = 0;
+      let subTableLowestValue = 0;
+      let subTableHighestValue = 0;
       let lastPrefix;
       let columnName;
       let columnCoordinate = -1;
@@ -341,11 +363,13 @@ export default {
             const prefix = columns[columnIndex].slice(0, splitIndex + 1);
             if (prefix !== lastPrefix) {
               lastPrefix = prefix;
+              subTableLowestValue = 0;
+              subTableHighestValue = 0;
               columnCoordinate += 1.4;
+              columnName = columns[columnIndex].slice(splitIndex + 2);
             } else {
               columnCoordinate += 1;
             }
-            columnName = columns[columnIndex].slice(splitIndex + 2);
           } else {
             columnName = columns[columnIndex];
             columnCoordinate += 1;
@@ -368,16 +392,19 @@ export default {
                 COORDINATES: [rowIndex / 140, scaledColumnCoordinate],
                 ROW: json[rowIndex][columns[0]],
                 VALUE: json[rowIndex][columns[columnIndex]],
+                TITLE: lastPrefix,
               };
-              if (
-                gridCellLayerCell.VALUE > highestValue
-              ) {
-                highestValue = gridCellLayerCell.VALUE;
+              if (gridCellLayerCell.VALUE > subTableHighestValue) {
+                subTableHighestValue = gridCellLayerCell.VALUE;
+                if (gridCellLayerCell.VALUE > highestValue) {
+                  highestValue = gridCellLayerCell.VALUE;
+                }
               }
-              if (
-                gridCellLayerCell.VALUE < lowestValue
-              ) {
-                lowestValue = gridCellLayerCell.VALUE;
+              if (gridCellLayerCell.VALUE < subTableLowestValue) {
+                subTableLowestValue = gridCellLayerCell.VALUE;
+                if (gridCellLayerCell.VALUE < lowestValue) {
+                  lowestValue = gridCellLayerCell.VALUE;
+                }
               }
               if (gridCellLayerCell.VALUE < 0) {
                 gridCellLayerCell.VALUE *= -1;
@@ -406,6 +433,13 @@ export default {
             });
           }
         }
+        if (lastPrefix) {
+          this.subTables[lastPrefix] = {
+            TITLE: lastPrefix,
+            LOWEST_VALUE: subTableLowestValue,
+            HIGHEST_VALUE: subTableHighestValue,
+          };
+        }
       }
       return [
         gridCellLayerData,
@@ -418,9 +452,37 @@ export default {
     },
     configureNegativeValues() {
       this.layerSettings.gridCellLayer.getPosition = (d) => [d.COORDINATES[0],
-        d.COORDINATES[1], d.VALUE * (this.elevationScale * d.ORIENTATION)];
+        d.COORDINATES[1], d.VALUE * (this.updateTriggerObjects.elevationScale * d.ORIENTATION)];
       this.layerSettings.gridCellLayer.getFillColor = (d) => ((!d.ORIENTATION)
-        ? this.colorGradient(d.VALUE).rgb() : this.colorGradient(d.VALUE * d.ORIENTATION).rgb());
+        ? this.colorGradientDict[d.TITLE](d.VALUE).rgb()
+        : this.colorGradientDict[d.TITLE](d.VALUE * d.ORIENTATION).rgb());
+    },
+    createSubTableGradientForms() {
+      for (let i = 0; i < this.settingsTemplate.basicSettings.settings.length; i += 1) {
+        if (this.settingsTemplate.basicSettings.settings[i].label === 'Color Gradient') {
+          for (
+            let j = 0; j < this.settingsTemplate.basicSettings.settings[i].inputs.length; j += 1
+          ) {
+            if (this.settingsTemplate.basicSettings.settings[i].inputs[j].id === 'gradientPreset') {
+              Object.keys(this.subTables).forEach((subTableTitle) => {
+                // We need to DEEP clone this template object.
+                // The only way to remove reactivity seems to parse it as an JSON object.
+                // This is questionable but right now the least bad way to clone it.
+                const gradientFormTemplate = JSON.parse(JSON.stringify(
+                  this.settingsTemplate.basicSettings.settings[i].inputs[j],
+                ));
+                gradientFormTemplate.label = subTableTitle;
+                gradientFormTemplate.id = gradientFormTemplate.label;
+                gradientFormTemplate.condition = true;
+                this.settings.gradient[gradientFormTemplate.id] = gradientFormTemplate.value;
+                this.settingsTemplate.basicSettings.settings[i].inputs.push(gradientFormTemplate);
+              });
+              break;
+            }
+          }
+          break;
+        }
+      }
     },
     getTooltip({ object }) {
       if (!object) {

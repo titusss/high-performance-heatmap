@@ -72,7 +72,9 @@
             "label": "Gradient Presets",
             "type": "dropdownGradient",
             "labelCols": 6,
-            "propertyType": "layer",
+            "propertyType": "gradient",
+            "valueDependencyId": "individualGradients",
+            "condition": false,
             "value": {
               "label": "RdYlGn",
               "value": "RdYlGn"
@@ -116,26 +118,12 @@
             ]
           },
           {
-            "id": "maxGradientValue",
-            "label": "Max Color Value",
-            "type": "range",
-            "min": null,
-            "max": null,
-            "step": 1,
-            "labelCols": 5,
-            "value": 100,
-            "propertyType": "layer"
-          },
-          {
-            "id": "minGradientValue",
-            "label": "Min Color Value",
-            "type": "range",
-            "min": null,
-            "max": null,
-            "step": 1,
-            "labelCols": 5,
-            "value": 1,
-            "propertyType": "layer"
+            "id": "individualGradients",
+            "label": "Individual Gradients",
+            "type": "checkbox",
+            "labelCols": 6,
+            "value": false,
+            "propertyType": "gradient"
           }
         ]
       }
