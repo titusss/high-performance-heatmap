@@ -11,7 +11,7 @@
       :settings="settings"
       :settingsTemplate="settingsTemplate"
       :layerSettings="layerSettings"
-      :colorGradient="colorGradient"
+      :colorGradientDict="colorGradientDict"
     />
     <cameraMenu
       class="camera_menu menu_c"

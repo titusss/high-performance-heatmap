@@ -28,7 +28,7 @@
       <exportMenu
         v-else-if="option.id === 'exportImage'"
         :layerSettings="layerSettings"
-        :colorGradient="colorGradient"
+        :colorGradientDict="colorGradientDict"
         @take-screenshot="$emit('take-screenshot')"
       />
     </b-collapse>
@@ -48,7 +48,7 @@ export default {
     settings: Object,
     settingsTemplate: Object,
     layerSettings: Object,
-    colorGradient: Function,
+    colorGradientDict: Object,
   },
   data() {
     return {

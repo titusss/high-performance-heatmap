@@ -32,7 +32,7 @@
 export default {
   props: {
     layerSettings: Object,
-    colorGradient: Function,
+    colorGradientDict: Object,
   },
   data() {
     return {
@@ -103,8 +103,10 @@ export default {
         }
         rect.setAttribute(
           'fill',
-          this.colorGradient(this.layerSettings.gridCellLayer.data[k].VALUE
-            * orientation).hex(),
+          this.colorGradientDict[
+            this.layerSettings.gridCellLayer.data[k].TITLE](
+            this.layerSettings.gridCellLayer.data[k].VALUE * orientation,
+          ).hex(),
         );
         cellGroup.appendChild(rect);
       }
