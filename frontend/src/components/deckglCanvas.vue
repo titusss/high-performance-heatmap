@@ -12,6 +12,7 @@
       :settingsTemplate="settingsTemplate"
       :layerSettings="layerSettings"
       :colorGradientDict="colorGradientDict"
+      :minMaxValues="[this.lowestValue, this.highestValue]"
     />
     <cameraMenu
       class="camera_menu menu_c"
@@ -255,8 +256,7 @@ export default {
             Object.keys(this.subTables).forEach((subTableTitle) => {
               this.colorGradientDict[subTableTitle] = chroma
                 .scale(s[subTableTitle].value)
-                .domain([this.subTables[subTableTitle].LOWEST_VALUE,
-                  this.subTables[subTableTitle].HIGHEST_VALUE]);
+                .domain(s[subTableTitle].domain);
             });
           }
           if (this.lowestValue < 0) {
@@ -474,6 +474,19 @@ export default {
                 gradientFormTemplate.label = subTableTitle;
                 gradientFormTemplate.id = gradientFormTemplate.label;
                 gradientFormTemplate.condition = true;
+                gradientFormTemplate.min = this.subTables[subTableTitle].LOWEST_VALUE;
+                gradientFormTemplate.max = this.subTables[subTableTitle].HIGHEST_VALUE;
+                gradientFormTemplate.value.domain = [
+                  gradientFormTemplate.min,
+                  // The following uses EPSILON to round to two decimal places, if necessary.
+                  Math.round(
+                    ((gradientFormTemplate.max
+                    - gradientFormTemplate.min) / 2
+                    + gradientFormTemplate.min) * 100
+                    + Number.EPSILON,
+                  ) / 100,
+                  gradientFormTemplate.max,
+                ];
                 this.settings.gradient[gradientFormTemplate.id] = gradientFormTemplate.value;
                 this.settingsTemplate.basicSettings.settings[i].inputs.push(gradientFormTemplate);
               });

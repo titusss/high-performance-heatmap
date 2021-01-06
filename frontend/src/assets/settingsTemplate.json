@@ -52,19 +52,6 @@
         ]
       },
       {
-        "label": "Tooltip",
-        "inputs": [
-          {
-            "id": "pickable",
-            "label": "Show Tooltip",
-            "type": "checkbox",
-            "labelCols": 6,
-            "value": true,
-            "propertyType": "layer"
-          }
-        ]
-      },
-      {
         "label": "Color Gradient",
         "inputs": [
           {
@@ -77,7 +64,8 @@
             "condition": false,
             "value": {
               "label": "RdYlGn",
-              "value": "RdYlGn"
+              "value": "RdYlGn",
+              "domain": [0,1,2]
             },
             "options": [
               "BuGn",
@@ -134,6 +122,19 @@
     "id": "advancedSettings",
     "visible": false,
     "settings": [
+      {
+        "label": "Tooltip",
+        "inputs": [
+          {
+            "id": "pickable",
+            "label": "Show Tooltip",
+            "type": "checkbox",
+            "labelCols": 6,
+            "value": true,
+            "propertyType": "layer"
+          }
+        ]
+      },
       {
         "label": "Lighting",
         "inputs": [

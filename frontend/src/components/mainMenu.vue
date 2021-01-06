@@ -24,6 +24,7 @@
         @settings-changed="$emit('settings-changed', $event)"
         :settings="settings"
         :settingsTemplate="settingsTemplate"
+        :minMaxValues="minMaxValues"
       />
       <exportMenu
         v-else-if="option.id === 'exportImage'"
@@ -49,6 +50,7 @@ export default {
     settingsTemplate: Object,
     layerSettings: Object,
     colorGradientDict: Object,
+    minMaxValues: Array,
   },
   data() {
     return {
