@@ -92,6 +92,12 @@
               </template>
               <div class="gradient-slider-parent">
               <!-- <label for="range-1">Example range with min and max</label> -->
+              <div class="min-max-wrapper">
+                <div class="vue-slider-mark-label mark-left">
+                  <p class="smaller-text">Global Min.</p><p>{{minMaxValues[0]}}</p></div>
+                <div class="vue-slider-mark-label mark-right">
+                  <p class="smaller-text">Global Max.</p><p>{{minMaxValues[1]}}</p></div>
+              </div>
               <vue-slider
                 :style="getColorGradientCss(
                   localSettings[input.propertyType][input.id].label,
@@ -107,7 +113,7 @@
                 :contained="true"
                 :order="true"
                 :useKeyboard="false"
-                :marks="[minMaxValues[0], input.min, input.max, minMaxValues[1]]"
+                :marks="[input.min, input.max]"
                 :interval="gradientSliderInterval"
                 >
                  <template v-slot:tooltip="{ index }">
@@ -359,5 +365,46 @@ input::-webkit-inner-spin-button {
 }
 .form-control-sm {
   padding: 0.25rem 0.15rem !important;
+}
+.vue-slider-mark {
+  height: .5rem !important;
+  width: .5rem !important;
+}
+.vue-slider-mark-step {
+  background-color: #fff;
+  box-shadow: inset 0px 1px 1px #00000047;
+}
+.vue-slider-mark:first-child,
+.vue-slider-mark-step,
+.vue-slider-mark:last-child,
+.vue-slider-mark-step {
+  display: block !important;
+}
+.min-max-wrapper {
+  display: flex;
+  margin-bottom: 5px;
+}
+.mark-left, .mark-right {
+  position: relative !important;
+  display: inline-block;
+  line-height: 1em;
+}
+.mark-right {
+  text-align: right;
+  margin-left: auto;
+  margin-right: 0;
+}
+.mark-left {
+  margin-right: auto;
+  margin-left: 0;
+}
+p {
+  margin: 0 !important;
+}
+.vue-slider-dot-tooltip-bottom {
+  bottom: -5px;
+}
+.smaller-text {
+  font-size: smaller;
 }
 </style>
