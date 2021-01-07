@@ -70,6 +70,7 @@
               "
             ></b-form-checkbox>
             <b-dropdown
+              :lazy="true"
               class="dropdown-gradient"
               variant="link"
               size="sm"
@@ -106,15 +107,15 @@
                 :min="minValue"
                 :max="maxValue"
                 height="1.5rem"
-                :lazy="false"
+                :lazy="gradientSliderLazy"
                 :tooltip-placement="'bottom'"
                 tooltip="always"
                 v-model="localSettings[input.propertyType][input.id].domain"
                 :contained="true"
                 :order="true"
                 :useKeyboard="false"
-                :marks="[input.min, input.max]"
-                :interval="gradientSliderInterval"
+                :marks="[input.min, input.mid, input.max]"
+                :interval="input.interval"
                 >
                  <template v-slot:tooltip="{ index }">
                   <div class="gradient-value-input">
@@ -134,6 +135,27 @@
                 </template>
               </vue-slider>
               </div>
+              <b-container class="gradient-slider-options">
+                <b-row align-v="center">
+                  <b-col><b-form-checkbox
+                    id="gradient-slider-lazy-checkbox"
+                    v-model="gradientSliderLazy"
+                    size="sm"
+                    :value="false"
+                    :unchecked-value="true"
+                  >Live Preview</b-form-checkbox></b-col>
+                  <b-col class="text-right">
+                    <b-button size="sm" variant="link" class="text-decoration-none no-padding"
+                      @click="
+                        localSettings[input.propertyType][input.id].domain =
+                          [input.min, input.mid, input.max]
+                      ">
+                    <b-icon icon="arrow-counterclockwise" aria-hidden="true">
+                      </b-icon>
+                     Reset to default
+                  </b-button></b-col>
+                </b-row>
+              </b-container>
               <div class="gradient-overview">
               <b-dropdown-item-button
                 v-for="gradient in input.options"
@@ -208,11 +230,10 @@ export default {
     return {
       localSettings: this.settings,
       gradientSliderInterval: 1,
+      gradientSliderLazy: true,
     };
   },
   created() {
-    this.setSliderInterval();
-    console.log(this.settingsTemplate);
     this.$emit('settings-changed', { type: 'gradient', settings: this.localSettings.gradient });
     this.$emit('settings-changed', { type: 'layer', settings: this.localSettings.layer });
   },
@@ -229,11 +250,6 @@ export default {
         colorArray.push(colorGradient(this.minValue + (step * i)));
       }
       return `background-image: linear-gradient(to right, ${colorArray})`;
-    },
-    setSliderInterval() {
-      const range = this.minMaxValues[1] - this.minMaxValues[0];
-      const orderOfMagnitude = Math.floor(Math.log10(Math.abs(range)));
-      this.gradientSliderInterval = 10 ** (orderOfMagnitude - 3);
     },
   },
 };
@@ -337,7 +353,7 @@ label {
   background: none;
 }
 .gradient-slider-parent {
-  padding: .25rem 1.5rem 3rem 1.5rem !important;
+  padding: .25rem 1.5rem 2.5rem 1.5rem !important;
 }
 .gradient-value-input>*>
 input::-webkit-outer-spin-button,
@@ -357,11 +373,13 @@ input::-webkit-inner-spin-button {
   box-shadow: 1px 5px 10px 0px #0000003d;
   text-align: center;
   border: 2px solid #000;
+  transition: transform 200ms cubic-bezier(0, 0, 0.18, 1.79);
 }
 .gradient-value-input>.form-control:focus {
   background-color: #000;
   color: #fff;
   border: 2px solid #000;
+  transform: scale(1.1);
 }
 .form-control-sm {
   padding: 0.25rem 0.15rem !important;
@@ -406,5 +424,13 @@ p {
 }
 .smaller-text {
   font-size: smaller;
+}
+.gradient-slider-options {
+  padding: 0 1.5rem .5rem 1.5rem !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  margin-bottom: .5rem;
+}
+.no-padding {
+  padding: 0 !important;
 }
 </style>

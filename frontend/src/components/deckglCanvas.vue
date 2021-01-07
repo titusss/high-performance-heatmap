@@ -88,6 +88,7 @@ export default {
           billboard: false,
           fontFamily:
             '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, sans-serif',
+          fontWeight: 'bold',
         },
         rowTextLayer: {
           id: 'row-text-layer',
@@ -138,6 +139,8 @@ export default {
   },
   mounted() {
     this.deck = new Deck({
+      // Disable Retina rendering for better performance:
+      // useDevicePixels: false,
       canvas: this.$refs.canvas,
       viewState: this.currentViewState,
       getTooltip: this.getTooltip,
@@ -250,7 +253,7 @@ export default {
             Object.keys(this.subTables).forEach((subTableTitle) => {
               this.colorGradientDict[subTableTitle] = chroma
                 .scale(this.colorGradientPreset)
-                .domain([this.lowestValue, this.highestValue]);
+                .domain(s.gradientPreset.domain);
             });
           } else {
             Object.keys(this.subTables).forEach((subTableTitle) => {
@@ -468,34 +471,59 @@ export default {
                 // We need to DEEP clone this template object.
                 // The only way to remove reactivity seems to parse it as an JSON object.
                 // This is questionable but right now the least bad way to clone it.
-                const gradientFormTemplate = JSON.parse(JSON.stringify(
+                let gradientFormTemplate = JSON.parse(JSON.stringify(
                   this.settingsTemplate.basicSettings.settings[i].inputs[j],
                 ));
                 gradientFormTemplate.label = subTableTitle;
                 gradientFormTemplate.id = gradientFormTemplate.label;
                 gradientFormTemplate.condition = true;
-                gradientFormTemplate.min = this.subTables[subTableTitle].LOWEST_VALUE;
-                gradientFormTemplate.max = this.subTables[subTableTitle].HIGHEST_VALUE;
-                gradientFormTemplate.value.domain = [
-                  gradientFormTemplate.min,
-                  // The following uses EPSILON to round to two decimal places, if necessary.
-                  Math.round(
-                    ((gradientFormTemplate.max
-                    - gradientFormTemplate.min) / 2
-                    + gradientFormTemplate.min) * 100
-                    + Number.EPSILON,
-                  ) / 100,
-                  gradientFormTemplate.max,
-                ];
+                gradientFormTemplate = this.calculateGradientDomain(
+                  gradientFormTemplate,
+                  this.subTables[subTableTitle].LOWEST_VALUE,
+                  this.subTables[subTableTitle].HIGHEST_VALUE,
+                );
                 this.settings.gradient[gradientFormTemplate.id] = gradientFormTemplate.value;
                 this.settingsTemplate.basicSettings.settings[i].inputs.push(gradientFormTemplate);
               });
+              this.settingsTemplate.basicSettings.settings[i].inputs[j] = this
+                .calculateGradientDomain(
+                  settingsTemplate.basicSettings.settings[i].inputs[j],
+                  this.lowestValue,
+                  this.highestValue,
+                );
               break;
             }
           }
           break;
         }
       }
+    },
+    calculateGradientDomain(form, lowestValue, highestValue) {
+      // Calculate order of magnitude of the value range between data min and max.
+      const gradientFormTemplate = form;
+      gradientFormTemplate.min = lowestValue;
+      gradientFormTemplate.max = highestValue;
+      gradientFormTemplate.orderOfMagnitude = Math
+        .floor(Math.log10(Math.abs(highestValue - lowestValue)));
+      gradientFormTemplate.interval = 10 ** (gradientFormTemplate.orderOfMagnitude - 3);
+      // The following uses EPSILON to round to n decimal places, where n is
+      // determined by the Order of Magnitude of the range between min and max
+      // This means that the mid points of data with ranges such as 0.0001 will be
+      // differently rounded than ranges like 10000. This isn't completely crucial,
+      // but improves UX by determining the gradient slider interval and the overall
+      // length and precision of the mid point number.
+      gradientFormTemplate.mid = Math.round(
+        ((highestValue
+          - lowestValue) / 2
+          + lowestValue) * 10 ** (-gradientFormTemplate.orderOfMagnitude + 3)
+          + Number.EPSILON,
+      ) / 10 ** (-gradientFormTemplate.orderOfMagnitude + 3);
+      gradientFormTemplate.value.domain = [
+        lowestValue,
+        gradientFormTemplate.mid,
+        highestValue,
+      ];
+      return gradientFormTemplate;
     },
     getTooltip({ object }) {
       if (!object) {
