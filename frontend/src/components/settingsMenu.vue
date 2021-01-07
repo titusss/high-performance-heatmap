@@ -230,7 +230,7 @@ export default {
     return {
       localSettings: this.settings,
       gradientSliderInterval: 1,
-      gradientSliderLazy: true,
+      gradientSliderLazy: false,
     };
   },
   created() {
