@@ -99,6 +99,7 @@
                 <div class="vue-slider-mark-label mark-right">
                   <p class="smaller-text">Global Max.</p><p>{{minMaxValues[1]}}</p></div>
               </div>
+              {{input.interval}}
               <vue-slider
                 :style="getColorGradientCss(
                   localSettings[input.propertyType][input.id].label,
