@@ -506,6 +506,9 @@ export default {
       gradientFormTemplate.orderOfMagnitude = Math
         .floor(Math.log10(Math.abs(highestValue - lowestValue)));
       gradientFormTemplate.interval = 10 ** (gradientFormTemplate.orderOfMagnitude - 3);
+      if (gradientFormTemplate.interval > 1) {
+        gradientFormTemplate.interval = 1; // Cap interval at 1 to avoid division errors
+      }
       // The following uses EPSILON to round to n decimal places, where n is
       // determined by the Order of Magnitude of the range between min and max
       // This means that the mid points of data with ranges such as 0.0001 will be
